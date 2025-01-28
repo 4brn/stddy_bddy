@@ -15,5 +15,4 @@
 - GET /api/users/:id - Lists user
 - POST /api/users - Creates user
 - PUT /api/user/:id - Updates user
-- DELETE /api/user/:id - 
-
+- DELETE /api/user/:id - Deletes user
