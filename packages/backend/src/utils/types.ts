@@ -1,19 +1,26 @@
-import { userTable, sessionTable } from "../db/schema";
+import { users, sessions } from "../db";
 
 declare global {
   namespace Express {
     interface Request {
       session: {
         user?: User;
-        id: Session;
+        id: string;
       };
     }
   }
 }
 
-export type User = typeof userTable.$inferSelect;
-export type Session = typeof sessionTable.$inferSelect;
+export const DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
 
-export type SessionValidation =
-  | { session: Session; user: User }
-  | { session: null; user: null };
+export type User = typeof users.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type SessionValidationResult =
+  | {
+      user: User;
+      session: Session;
+    }
+  | {
+      user: null;
+      session: null;
+    };
