@@ -3,6 +3,9 @@
 # Local develompment DB
 local.db
 
+# Playground for testing out stuff
+playground.ts
+
 # Logs
 
 logs

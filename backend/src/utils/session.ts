@@ -12,7 +12,7 @@ export async function createSession(token: string, userId: number) {
   const session: Session = {
     id: token,
     userId: userId,
-    expiresAt: new Date(Date.now() + DAY_IN_MILLIS * 7),
+    expiresAt: new Date(Date.now() + DAY_IN_MILLIS * 1),
   };
 
   await db.insert(sessions).values(session);
@@ -35,7 +35,7 @@ export async function validateSession(token: string) {
   }
 
   if (Date.now() >= session.expiresAt.getTime() - DAY_IN_MILLIS * 3) {
-    session.expiresAt = new Date(Date.now() + DAY_IN_MILLIS * 7);
+    session.expiresAt = new Date(Date.now() + DAY_IN_MILLIS * 1);
     await db
       .update(sessions)
       .set({

@@ -3,6 +3,7 @@ import Router, { type Request, type Response } from "express";
 import { db, users } from "../db";
 import { eq } from "drizzle-orm";
 import * as lib from "../utils/session";
+import * as err from "../utils/error";
 import { userSchema } from "../utils/validation";
 
 const router = Router();
@@ -12,7 +13,7 @@ router.post("/api/auth/signup", async (req: Request, res: Response) => {
   if (token) {
     const { session } = await lib.validateSession(token);
     if (session) {
-      res.status(409).send({ error: "SESSION_FOUND" });
+      res.status(307).send(err.SESSION_COOKIE_FOUND);
       return;
     }
   }
@@ -20,7 +21,7 @@ router.post("/api/auth/signup", async (req: Request, res: Response) => {
   const { success, data, error } = await userSchema.safeParseAsync(req.body);
   if (!success) {
     console.error(error);
-    res.status(400).send({ error: "INVALID_CREDENTIALS" });
+    res.status(400).send(err.INVALID_CREDENTIALS);
     return;
   }
 
@@ -29,7 +30,7 @@ router.post("/api/auth/signup", async (req: Request, res: Response) => {
     .from(users)
     .where(eq(users.username, data.username));
   if (query.length > 0) {
-    res.status(409).send({ error: "USER_EXISTS" });
+    res.status(409).send(err.USER_FOUND);
     return;
   }
 
@@ -38,13 +39,13 @@ router.post("/api/auth/signup", async (req: Request, res: Response) => {
   await db
     .insert(users)
     .values({ ...data, isAdmin: false })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send({ error: "INTERNAL_SERVER_ERROR" });
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(err.INTERNAL_SERVER_ERROR);
       return;
     });
 
-  res.sendStatus(200);
+  res.sendStatus(201);
   return;
 });
 
@@ -53,7 +54,7 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
   if (token) {
     const { session } = await lib.validateSession(token);
     if (session) {
-      res.status(409).send({ error: "SESSION_FOUND" });
+      res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
       return;
     }
   }
@@ -61,7 +62,7 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
   const { success, data, error } = await userSchema.safeParseAsync(req.body);
   if (!success) {
     console.log(error);
-    res.status(400).send({ error: "INVALID_CREDENTIALS" });
+    res.status(400).send(err.INVALID_CREDENTIALS);
     return;
   }
 
@@ -70,14 +71,14 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
     .from(users)
     .where(eq(users.username, data.username));
   if (query.length < 1) {
-    res.status(404).send({ error: "NOT_FOUND" });
+    res.status(404).send(err.USER_NOT_FOUND);
     return;
   }
 
   const user = query[0];
   const passwordsMatch = await bcrypt.compare(data.password, user.password);
   if (!passwordsMatch) {
-    res.status(401).send({ error: "INVALID_CREDENTIALS" });
+    res.status(400).send(err.INVALID_CREDENTIALS);
     return;
   }
 
@@ -89,10 +90,10 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
   return;
 });
 
-router.post("/api/auth/logout", async (req: Request, res: Response) => {
+router.delete("/api/auth/logout", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
-    res.status(409).send({ error: "SESSION_NOT_FOUND" });
+    res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
     return;
   }
 
