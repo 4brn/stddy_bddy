@@ -4,13 +4,13 @@ import { db, users, sessions } from "../db";
 import { userSchema, userUpdateSchema } from "../utils/validation";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
-import type { User } from "../utils/types";
+import type { User } from "../../../shared/types";
 import * as err from "../utils/error";
 
 const router = Router();
 
 // List All
-router.get("/api/users", async (req: Request, res: Response) => {
+router.get("/users", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
@@ -35,7 +35,7 @@ router.get("/api/users", async (req: Request, res: Response) => {
 });
 
 // Create
-router.post("/api/users", async (req: Request, res: Response) => {
+router.post("/users", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
@@ -83,7 +83,7 @@ router.post("/api/users", async (req: Request, res: Response) => {
 });
 
 // Update
-router.patch("/api/users/:id", async (req: Request, res: Response) => {
+router.patch("/users/:id", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
@@ -133,7 +133,7 @@ router.patch("/api/users/:id", async (req: Request, res: Response) => {
 });
 
 // Delete
-router.delete("/api/users/:id", async (req: Request, res: Response) => {
+router.delete("/users/:id", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
@@ -167,7 +167,7 @@ router.delete("/api/users/:id", async (req: Request, res: Response) => {
 });
 
 // Logout
-router.delete("/api/users/logout/:id", async (req: Request, res: Response) => {
+router.delete("/users/logout/:id", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);

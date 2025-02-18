@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { db, sessions, users } from "../db";
-import { type Session, DAY_IN_MILLIS } from "../utils/types";
+import { type Session, DAY_IN_MILLIS } from "../../../shared/types";
 import type { Response, Request } from "express";
 
 export function generateToken() {
@@ -58,7 +58,7 @@ export function setSessionCookie(
 ) {
   res.cookie("session", token, {
     httpOnly: true,
-    sameSite: "lax",
+    // sameSite: "lax",
     expires: expiresAt,
     path: "/",
     secure: false, // true for production

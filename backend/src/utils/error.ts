@@ -1,4 +1,4 @@
-import type { Error } from "./types";
+import type { Error } from "../../../shared/types";
 
 export const UNAUTHORIZED: Error = { error: "UNAUTHORIZED" };
 export const INVALID_CREDENTIALS: Error = { error: "INVALID_CREDENTIALS" };

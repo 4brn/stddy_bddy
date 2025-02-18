@@ -1,4 +1,4 @@
-import { users, sessions } from "../db";
+import { users, sessions } from "../backend/src/db";
 
 // MIGHT USER LATER
 // declare global {

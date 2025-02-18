@@ -8,7 +8,7 @@ import { userSchema } from "../utils/validation";
 
 const router = Router();
 
-router.post("/api/auth/signup", async (req: Request, res: Response) => {
+router.post("/auth/register", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (token) {
     const { session } = await lib.validateSession(token);
@@ -49,12 +49,12 @@ router.post("/api/auth/signup", async (req: Request, res: Response) => {
   return;
 });
 
-router.post("/api/auth/login", async (req: Request, res: Response) => {
+router.post("/auth/login", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (token) {
     const { session } = await lib.validateSession(token);
     if (session) {
-      res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
+      res.status(307).send(err.SESSION_COOKIE_FOUND);
       return;
     }
   }
@@ -86,11 +86,11 @@ router.post("/api/auth/login", async (req: Request, res: Response) => {
   const session = await lib.createSession(newToken, user.id);
   lib.setSessionCookie(res, newToken, session.expiresAt);
 
-  res.sendStatus(200);
+  res.status(200).send(user);
   return;
 });
 
-router.delete("/api/auth/logout", async (req: Request, res: Response) => {
+router.delete("/auth/logout", async (req: Request, res: Response) => {
   const token = lib.getSessionFromCookie(req);
   if (!token) {
     res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
@@ -101,6 +101,24 @@ router.delete("/api/auth/logout", async (req: Request, res: Response) => {
   lib.deleteSessionCookie(res);
 
   res.sendStatus(200);
+  return;
+});
+
+router.get("/auth/me", async (req: Request, res: Response) => {
+  const token = lib.getSessionFromCookie(req);
+  if (!token) {
+    res.status(307).send(err.SESSION_COOKIE_NOT_FOUND);
+    return;
+  }
+
+  const { user } = await lib.validateSession(token);
+
+  if (!user) {
+    res.status(404).send(err.USER_NOT_FOUND);
+    return;
+  }
+
+  res.status(200).send(user);
   return;
 });
 

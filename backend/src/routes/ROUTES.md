@@ -18,7 +18,10 @@
   "username": "johndoe",
   "password": "12345"
 }
-// RETURNS 200 & SESSION COOKIE
+// SUCCESS 200 & SESSION COOKIE
+// 307 - SESSION COOKIE FOUND
+// 400 - INVALID USER CREDENTIALS
+// 404 - USER NOT FOUND IN DB
 ```
 
 ### DELETE /api/auth/logout
@@ -65,3 +68,7 @@
 ```
 
 ### DELETE /api/users/logout/:id
+```json
+// DELETES USER'S SESSION (aka logs them out)
+// RETURNS 200
+```
