@@ -10,193 +10,193 @@ import logger from "@/utils/logger";
 const AuthUser = User.omit({ role: true });
 
 export async function handleRegister(req: Request, res: Response) {
-  const token = lib.getSessionFromCookie(req);
+	const token = lib.getSessionFromCookie(req);
 
-  // Session Validation
-  if (token) {
-    const { session } = await lib.validateSession(token);
-    if (session) {
-      res.status(307).send({
-        success: false,
-        error: Error.SESSION_FOUND,
-      });
+	// Session Validation
+	if (token) {
+		const { session } = await lib.validateSession(token);
+		if (session) {
+			res.status(307).send({
+				success: false,
+				error: Error.SESSION_FOUND,
+			});
 
-      return;
-    }
-  }
+			return;
+		}
+	}
 
-  // Input Validation
-  const { success, data, error } = await AuthUser.safeParseAsync(req.body);
+	// Input Validation
+	const { success, data, error } = await AuthUser.safeParseAsync(req.body);
 
-  if (!success) {
-    res.status(400).send({
-      success: false,
-      error: Error.INVALID_CREDENTIALS,
-    });
+	if (!success) {
+		res.status(400).send({
+			success: false,
+			error: Error.INVALID_CREDENTIALS,
+		});
 
-    logger.error(error);
+		logger.error(error);
 
-    return;
-  }
+		return;
+	}
 
-  // User Validation
-  const query = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.username, data.username))
-    .limit(1);
+	// User Validation
+	const query = await db
+		.select()
+		.from(usersTable)
+		.where(eq(usersTable.username, data.username))
+		.limit(1);
 
-  if (query.length !== 0) {
-    res.status(409).send({
-      success: false,
-      error: Error.USER_FOUND,
-    });
+	if (query.length !== 0) {
+		res.status(409).send({
+			success: false,
+			error: Error.USER_FOUND,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  data.password = await password.hash(data.password, "bcrypt");
+	data.password = await password.hash(data.password, "bcrypt");
 
-  // Insert to DB
-  await db
-    .insert(usersTable)
-    .values({ ...data, role: "user" })
-    .catch((error) => {
-      res.status(500).send({
-        success: false,
-        error: Error.INTERNAL_SERVER_ERROR,
-      });
+	// Insert to DB
+	await db
+		.insert(usersTable)
+		.values({ ...data, role: "user" })
+		.catch((error) => {
+			res.status(500).send({
+				success: false,
+				error: Error.INTERNAL_SERVER_ERROR,
+			});
 
-      logger.error(error);
-      return;
-    });
+			logger.error(error);
+			return;
+		});
 
-  res.status(201).send({ success: true, message: "Registered" });
+	res.status(201).send({ success: true, message: "Registered" });
 
-  logger.info("Registered: ", { ...data, role: "user" });
-  return;
+	logger.info("Registered: ", { ...data, role: "user" });
+	return;
 }
 
 export async function handleLogin(req: Request, res: Response) {
-  const token = lib.getSessionFromCookie(req);
+	const token = lib.getSessionFromCookie(req);
 
-  if (token) {
-    const { session } = await lib.validateSession(token);
-    if (session) {
-      res.status(307).send({
-        success: false,
-        error: Error.SESSION_FOUND,
-      });
+	if (token) {
+		const { session } = await lib.validateSession(token);
+		if (session) {
+			res.status(307).send({
+				success: false,
+				error: Error.SESSION_FOUND,
+			});
 
-      return;
-    }
-  }
+			return;
+		}
+	}
 
-  const { success, data, error } = await AuthUser.safeParseAsync(req.body);
+	const { success, data, error } = await AuthUser.safeParseAsync(req.body);
 
-  if (!success) {
-    res.status(400).send({
-      success: false,
-      error: Error.INVALID_CREDENTIALS,
-    });
+	if (!success) {
+		res.status(400).send({
+			success: false,
+			error: Error.INVALID_CREDENTIALS,
+		});
 
-    logger.error(error);
+		logger.error(error);
 
-    return;
-  }
+		return;
+	}
 
-  const query = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.username, data.username));
+	const query = await db
+		.select()
+		.from(usersTable)
+		.where(eq(usersTable.username, data.username));
 
-  if (query.length !== 1) {
-    res.status(404).send({
-      status: false,
-      error: Error.USER_NOT_FOUND,
-    });
+	if (query.length !== 1) {
+		res.status(404).send({
+			status: false,
+			error: Error.USER_NOT_FOUND,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  const user = query[0];
+	const user = query[0];
 
-  const passwordsMatch = await password.verify(data.password, user.password);
+	const passwordsMatch = await password.verify(data.password, user.password);
 
-  if (!passwordsMatch) {
-    res.status(400).send({
-      success: false,
-      error: Error.INVALID_CREDENTIALS,
-    });
+	if (!passwordsMatch) {
+		res.status(400).send({
+			success: false,
+			error: Error.INVALID_CREDENTIALS,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  const newToken = lib.generateToken();
-  const session = await lib.createSession(newToken, user.id);
-  lib.setSessionCookie(res, newToken, session.expiresAt);
+	const newToken = lib.generateToken();
+	const session = await lib.createSession(newToken, user.id);
+	lib.setSessionCookie(res, newToken, session.expiresAt);
 
-  res.status(200).send({
-    success: true,
-    data: user,
-    message: "Logged In",
-  });
+	res.status(200).send({
+		success: true,
+		data: user,
+		message: "Logged In",
+	});
 
-  logger.info(`Logged in: ${user}`);
-  return;
+	logger.info(`Logged in: ${user}`);
+	return;
 }
 
 export async function handleLogout(req: Request, res: Response) {
-  const token = lib.getSessionFromCookie(req);
+	const token = lib.getSessionFromCookie(req);
 
-  if (!token) {
-    res.status(307).send({
-      success: false,
-      error: Error.SESSION_NOT_FOUND,
-    });
+	if (!token) {
+		res.status(307).send({
+			success: false,
+			error: Error.SESSION_NOT_FOUND,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  await lib.invalidateSession(token);
-  lib.deleteSessionCookie(res);
+	await lib.invalidateSession(token);
+	lib.deleteSessionCookie(res);
 
-  res.status(200).send({
-    success: true,
-    message: "Logged out",
-  });
+	res.status(200).send({
+		success: true,
+		message: "Logged out",
+	});
 
-  logger.info(`Logged out: ${token}`);
-  return;
+	logger.info(`Logged out: ${token}`);
+	return;
 }
 
 export async function handleMe(req: Request, res: Response) {
-  const token = lib.getSessionFromCookie(req);
+	const token = lib.getSessionFromCookie(req);
 
-  if (!token) {
-    res.status(307).send({
-      success: false,
-      error: Error.SESSION_NOT_FOUND,
-    });
+	if (!token) {
+		res.status(307).send({
+			success: false,
+			error: Error.SESSION_NOT_FOUND,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  const { user } = await lib.validateSession(token);
+	const { user } = await lib.validateSession(token);
 
-  if (!user) {
-    res.status(404).send({
-      success: false,
-      error: Error.USER_NOT_FOUND,
-    });
+	if (!user) {
+		res.status(404).send({
+			success: false,
+			error: Error.USER_NOT_FOUND,
+		});
 
-    return;
-  }
+		return;
+	}
 
-  res.status(200).send({
-    success: true,
-    data: user,
-  });
+	res.status(200).send({
+		success: true,
+		data: user,
+	});
 
-  return;
+	return;
 }

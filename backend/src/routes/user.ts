@@ -5,7 +5,7 @@ import {
   updateUser,
   deleteUser,
   logoutUser,
-} from "@/lib/user";
+} from "@/services/user";
 
 const router = Router();
 

@@ -1,12 +1,5 @@
-import { drizzle } from "drizzle-orm/libsql";
 import { sqliteTable as table } from "drizzle-orm/sqlite-core";
 import * as t from "drizzle-orm/sqlite-core";
-
-export const db = drizzle({
-  connection: process.env.DB_FILE_NAME!,
-  casing: "snake_case",
-  logger: false,
-});
 
 export const usersTable = table("users", {
   id: t.int().primaryKey({ autoIncrement: true }),
@@ -23,3 +16,6 @@ export const sessionsTable = table("sessions", {
     .notNull(),
   expiresAt: t.int("expires_at", { mode: "timestamp" }).notNull(),
 });
+
+export type User = typeof usersTable.$inferSelect;
+export type Session = typeof sessionsTable.$inferSelect;

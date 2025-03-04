@@ -1,9 +1,10 @@
 import { type Request, type Response } from "express";
-import * as lib from "../utils/session";
-import { db, usersTable, sessionsTable } from "../db";
+import * as lib from "@/utils/session";
+import { db } from "@/db";
+import { sessionsTable, usersTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { User } from "../utils/validation";
-import { Error } from "../utils/error";
+import { User } from "@/utils/validation";
+import { Error } from "@/utils/error";
 import { password } from "bun";
 import logger from "@/utils/logger";
 
@@ -34,7 +35,7 @@ export async function getUsers(req: Request, res: Response) {
 
   const users = await db.select().from(usersTable);
 
-  res.status(200).send({ success: true, data: users });
+  res.status(200).json({ success: true, data: users });
 
   return;
 }

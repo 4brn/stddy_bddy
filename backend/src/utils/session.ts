@@ -1,8 +1,8 @@
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
-import { db, sessionsTable, usersTable } from "@/db";
+import { db } from "@/db";
+import { usersTable, sessionsTable, type Session } from "@/db/schema";
 import type { Response, Request } from "express";
-import type { Session } from "@/../../common/types";
 
 const DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
 

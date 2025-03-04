@@ -4,7 +4,7 @@ import {
   handleLogin,
   handleLogout,
   handleMe,
-} from "@/lib/auth";
+} from "@/services/auth";
 
 const router = Router();
 
