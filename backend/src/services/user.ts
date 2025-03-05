@@ -14,7 +14,7 @@ export async function getUsers(req: Request, res: Response) {
   if (!token) {
     res.status(307).send({
       success: false,
-      error: Error.SESSION_NOT_FOUND,
+      message: Error.SESSION_NOT_FOUND,
     });
 
     return;
@@ -25,7 +25,7 @@ export async function getUsers(req: Request, res: Response) {
   if (!session || user.role !== "admin") {
     res.status(401).send({
       success: false,
-      error: Error.UNAUTHORIZED,
+      message: Error.UNAUTHORIZED,
     });
 
     return;
@@ -46,7 +46,7 @@ export async function createUser(req: Request, res: Response) {
   if (!token) {
     res.status(307).send({
       success: false,
-      error: Error.SESSION_NOT_FOUND,
+      message: Error.SESSION_NOT_FOUND,
     });
 
     return;
@@ -57,7 +57,7 @@ export async function createUser(req: Request, res: Response) {
   if (!session || user.role !== "admin") {
     res.status(401).send({
       success: false,
-      error: Error.UNAUTHORIZED,
+      message: Error.UNAUTHORIZED,
     });
 
     return;
@@ -71,7 +71,7 @@ export async function createUser(req: Request, res: Response) {
     logger.error(error);
     res.status(400).send({
       success: false,
-      error: Error.INVALID_CREDENTIALS,
+      message: Error.INVALID_CREDENTIALS,
     });
 
     return;
@@ -85,7 +85,7 @@ export async function createUser(req: Request, res: Response) {
   if (users.length > 0) {
     res.status(409).send({
       success: false,
-      error: Error.USER_FOUND,
+      message: Error.USER_FOUND,
     });
 
     return;
@@ -100,7 +100,7 @@ export async function createUser(req: Request, res: Response) {
       logger.error(error);
       res.status(500).send({
         success: false,
-        error: Error.INTERNAL_SERVER_ERROR,
+        message: Error.INTERNAL_SERVER_ERROR,
       });
 
       return;
@@ -120,7 +120,7 @@ export async function updateUser(req: Request, res: Response) {
   if (!token) {
     res.status(307).send({
       success: false,
-      error: Error.SESSION_NOT_FOUND,
+      message: Error.SESSION_NOT_FOUND,
     });
 
     return;
@@ -131,7 +131,7 @@ export async function updateUser(req: Request, res: Response) {
   if (!session || user.role !== "admin") {
     res.status(401).send({
       success: false,
-      error: Error.UNAUTHORIZED,
+      message: Error.UNAUTHORIZED,
     });
 
     return;
@@ -147,7 +147,7 @@ export async function updateUser(req: Request, res: Response) {
   if (!success || isNaN(id)) {
     res.status(400).send({
       success: false,
-      error: Error.INVALID_CREDENTIALS,
+      message: Error.INVALID_CREDENTIALS,
     });
 
     logger.error(error);
@@ -162,7 +162,7 @@ export async function updateUser(req: Request, res: Response) {
   if (result.length < 1) {
     res.status(404).send({
       success: false,
-      error: Error.USER_NOT_FOUND,
+      message: Error.USER_NOT_FOUND,
     });
 
     return;
@@ -179,7 +179,7 @@ export async function updateUser(req: Request, res: Response) {
     .catch((error) => {
       res.status(500).send({
         success: false,
-        error: Error.INTERNAL_SERVER_ERROR,
+        message: Error.INTERNAL_SERVER_ERROR,
       });
       logger.error(error);
 
@@ -200,7 +200,7 @@ export async function deleteUser(req: Request, res: Response) {
   if (!token) {
     res.status(307).send({
       success: false,
-      error: Error.SESSION_NOT_FOUND,
+      message: Error.SESSION_NOT_FOUND,
     });
 
     return;
@@ -211,7 +211,7 @@ export async function deleteUser(req: Request, res: Response) {
   if (!session || user.role !== "admin") {
     res.status(401).send({
       success: false,
-      error: Error.UNAUTHORIZED,
+      message: Error.UNAUTHORIZED,
     });
 
     return;
@@ -223,7 +223,7 @@ export async function deleteUser(req: Request, res: Response) {
   if (isNaN(id)) {
     res.status(400).send({
       success: false,
-      error: Error.INVALID_CREDENTIALS,
+      message: Error.INVALID_CREDENTIALS,
     });
 
     return;
@@ -235,7 +235,7 @@ export async function deleteUser(req: Request, res: Response) {
   } catch (error) {
     res.status(500).send({
       success: false,
-      error: Error.INTERNAL_SERVER_ERROR,
+      message: Error.INTERNAL_SERVER_ERROR,
     });
 
     logger.error(error);
@@ -256,7 +256,7 @@ export async function logoutUser(req: Request, res: Response) {
   if (!token) {
     res.status(307).send({
       success: false,
-      error: Error.SESSION_NOT_FOUND,
+      message: Error.SESSION_NOT_FOUND,
     });
 
     return;
@@ -267,7 +267,7 @@ export async function logoutUser(req: Request, res: Response) {
   if (!session || user.role !== "admin") {
     res.status(401).send({
       success: false,
-      error: Error.UNAUTHORIZED,
+      message: Error.UNAUTHORIZED,
     });
 
     return;
@@ -277,7 +277,7 @@ export async function logoutUser(req: Request, res: Response) {
   if (isNaN(id)) {
     res.status(400).send({
       success: false,
-      error: Error.INVALID_CREDENTIALS,
+      message: Error.INVALID_CREDENTIALS,
     });
 
     return;
@@ -289,7 +289,7 @@ export async function logoutUser(req: Request, res: Response) {
     .catch((error) => {
       res.status(500).send({
         success: false,
-        error: Error.INTERNAL_SERVER_ERROR,
+        message: Error.INTERNAL_SERVER_ERROR,
       });
 
       logger.error(error);
