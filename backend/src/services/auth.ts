@@ -8,7 +8,7 @@ import { Error } from "@/utils/error";
 import { User } from "@/utils/validation";
 import logger from "@/utils/logger";
 
-const AuthUser = User.omit({ role: true });
+const AuthUser = User.omit({ role: true, id: true });
 
 export async function handleRegister(req: Request, res: Response) {
   const token = lib.getSessionFromCookie(req);
@@ -143,7 +143,7 @@ export async function handleLogin(req: Request, res: Response) {
     message: "Logged In",
   });
 
-  logger.info(`Logged in: ${user}`);
+  logger.info(`Logged in: ${user.username}`);
   return;
 }
 

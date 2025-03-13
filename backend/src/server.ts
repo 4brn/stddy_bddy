@@ -7,8 +7,8 @@ import logger from "@/utils/logger";
 import routes from "@/routes";
 
 const options = {
-  origin: "http://localhost:5173",
-  // methods: ["GET", "POST", "PATCH", "DELETE"],
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
   credentials: true,
 };
 

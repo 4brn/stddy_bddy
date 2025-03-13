@@ -2,11 +2,13 @@ import { type Request, type Response } from "express";
 import * as lib from "@/utils/session";
 import { db } from "@/db";
 import { sessionsTable, usersTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { User } from "@/utils/validation";
 import { Error } from "@/utils/error";
 import { password } from "bun";
 import logger from "@/utils/logger";
+
+const UserCreation = User.omit({ id: true });
 
 export async function getUsers(req: Request, res: Response) {
   const token = lib.getSessionFromCookie(req);
@@ -40,6 +42,51 @@ export async function getUsers(req: Request, res: Response) {
   return;
 }
 
+export async function getUsersWithSessions(req: Request, res: Response) {
+  const token = lib.getSessionFromCookie(req);
+
+  if (!token) {
+    res.status(307).send({
+      success: false,
+      message: Error.SESSION_NOT_FOUND,
+    });
+
+    return;
+  }
+
+  const { user, session } = await lib.validateSession(token);
+
+  if (!session || user.role !== "admin") {
+    res.status(401).send({
+      success: false,
+      message: Error.UNAUTHORIZED,
+    });
+
+    return;
+  }
+
+  lib.setSessionCookie(res, token, session.expiresAt);
+
+  // Use a left join with count aggregation to get all users with their session counts
+  const usersWithSessionActive = await db
+    .select({
+      id: usersTable.id,
+      username: usersTable.username,
+      password: usersTable.password,
+      role: usersTable.role,
+      active:
+        sql<boolean>`CASE WHEN COUNT(${sessionsTable.id}) > 0 THEN TRUE ELSE FALSE END`.as(
+          "active",
+        ),
+    })
+    .from(usersTable)
+    .leftJoin(sessionsTable, eq(usersTable.id, sessionsTable.userId))
+    .groupBy(usersTable.id);
+
+  res.status(200).json({ success: true, data: usersWithSessionActive });
+
+  return;
+}
 export async function createUser(req: Request, res: Response) {
   const token = lib.getSessionFromCookie(req);
 
@@ -65,7 +112,7 @@ export async function createUser(req: Request, res: Response) {
 
   lib.setSessionCookie(res, token, session.expiresAt);
 
-  const { success, data, error } = await User.safeParseAsync(req.body as User);
+  const { success, data, error } = await UserCreation.safeParseAsync(req.body);
 
   if (!success) {
     logger.error(error);
@@ -93,9 +140,10 @@ export async function createUser(req: Request, res: Response) {
 
   data.password = await password.hash(data.password, "bcrypt");
 
-  await db
+  const result = await db
     .insert(usersTable)
     .values(data as User)
+    .returning()
     .catch((error) => {
       logger.error(error);
       res.status(500).send({
@@ -109,6 +157,7 @@ export async function createUser(req: Request, res: Response) {
   res.status(201).send({
     success: true,
     message: "User created",
+    data: result,
   });
 
   return;
@@ -140,9 +189,7 @@ export async function updateUser(req: Request, res: Response) {
   lib.setSessionCookie(res, token, session.expiresAt);
 
   const id: number = Number(req.params.id);
-  const { success, data, error } = await User.partial().safeParseAsync(
-    req.body,
-  );
+  const { success, data, error } = await User.safeParseAsync(req.body);
 
   if (!success || isNaN(id)) {
     res.status(400).send({
@@ -168,7 +215,7 @@ export async function updateUser(req: Request, res: Response) {
     return;
   }
 
-  if (data.password) {
+  if (data.password !== result[0].password) {
     data.password = await password.hash(data?.password, "bcrypt");
   }
 
