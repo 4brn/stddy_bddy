@@ -32,7 +32,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { password } from "bun";
 
 export function Edit({
   user,
@@ -58,23 +57,33 @@ export function Edit({
       return;
     }
 
-    const response = await fetch(`http://localhost:1337/api/users/${data.id}`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(
+        `http://localhost:1337/api/users/${data.id}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify(data),
+        },
+      );
 
-    if (!response.ok) {
+      if (!response.ok) {
+        throw new Error("Server responded with an error");
+      }
+
+      crud.update(newUser);
+      toast.success("User Updated.");
+      setAlertOpen(false);
+      onOpenChange(false);
+    } catch (error) {
       reset();
       toast.error("An Error Occurred");
-      return;
     }
+  };
 
-    crud.update(newUser);
-    toast.success("User Updated.");
-    setAlertOpen(false);
-    onOpenChange(false); // Close the dialog after successful update
+  const handleChange = (field: keyof User, value: string) => {
+    setNewUser((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -94,9 +103,7 @@ export function Edit({
             <Input
               id="username"
               value={newUser.username}
-              onChange={(e) => {
-                setNewUser({ ...newUser, username: e.target.value });
-              }}
+              onChange={(e) => handleChange("username", e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -109,9 +116,7 @@ export function Edit({
               type="password"
               placeholder="optional"
               value={newUser.password === user.password ? "" : newUser.password}
-              onChange={(e) => {
-                setNewUser({ ...newUser, password: e.target.value });
-              }}
+              onChange={(e) => handleChange("password", e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -121,11 +126,11 @@ export function Edit({
             </Label>
             <Select
               value={newUser.role}
-              onValueChange={(value: "admin" | "user") => {
-                setNewUser({ ...newUser, role: value });
-              }}
+              onValueChange={(value: "admin" | "user") =>
+                handleChange("role", value)
+              }
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger className="col-span-3" id="role">
                 <SelectValue placeholder={newUser.role} />
               </SelectTrigger>
               <SelectContent>

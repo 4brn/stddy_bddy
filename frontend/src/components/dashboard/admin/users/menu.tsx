@@ -8,10 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import type { UserWithSession } from "./users";
+import type { UserWithSession, Crud } from "./users";
 import { Ellipsis } from "lucide-react";
 import { toast } from "sonner";
-import type { Crud } from "./users";
 import { Edit } from "./edit";
 import { useState } from "react";
 import { Delete } from "./delete";
@@ -29,23 +28,9 @@ export default function UserMenu({
   const [logOutOpen, setLogOutOpen] = useState(false);
 
   const handleCopy = () => {
-    const info = `id: ${user.id.toString()}, username: ${user.username}, password: ${user.password}, role: ${user.role}`;
+    const info = `id: ${user.id}, username: ${user.username}, password: ${user.password}, role: ${user.role}`;
     navigator.clipboard.writeText(info);
     toast.info("User info copied to clipboard");
-  };
-
-  const handleLogOut = async () => {
-    const response = await fetch(
-      `http://localhost:1337/api/users/logout/${user.id}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-      },
-    );
-    if (!response.ok) toast.error("Could not log out user");
-    if (response.ok) {
-      toast.success(`Logged out ${user.username}`);
-    }
   };
 
   return (
@@ -92,8 +77,8 @@ export default function UserMenu({
       <Edit
         user={user}
         crud={crud}
-        onOpenChange={setEditOpen}
         open={editOpen}
+        onOpenChange={setEditOpen}
       />
     </>
   );

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { userCreationSchema, type userCreate } from "@/lib/validation";
-import type { User } from "@schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Crud } from "./users";
@@ -42,18 +41,14 @@ export function Add({
   onOpenChange: (state: boolean) => void;
   open: boolean;
 }) {
-  // Initialize with empty object with default values instead of null
-  const [newUser, setNewUser] = useState<userCreate>({
-    username: "",
-    password: "",
-    role: "user",
-  });
+  const defaultUser = { username: "", password: "", role: "user" as const };
+  const [newUser, setNewUser] = useState<userCreate>(defaultUser);
   const [alertOpen, setAlertOpen] = useState(false);
 
-  const reset = () => setNewUser({ username: "", password: "", role: "user" });
+  const reset = () => setNewUser(defaultUser);
 
   const handleSubmit = async () => {
-    const { success, data, error } = userCreationSchema.safeParse(newUser);
+    const { success, data } = userCreationSchema.safeParse(newUser);
     if (!success) {
       toast.error("Validation error");
       reset();
@@ -79,11 +74,15 @@ export function Add({
         toast.success(`Added user ${newUser.username}`);
         reset();
         setAlertOpen(false);
-        onOpenChange(false); // Close the dialog after successful update
+        onOpenChange(false);
       }
     } catch (err) {
       toast.error("An Error Occurred");
     }
+  };
+
+  const handleInputChange = (field: keyof userCreate, value: string) => {
+    setNewUser((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -103,9 +102,7 @@ export function Add({
             <Input
               id="username"
               value={newUser.username}
-              onChange={(e) => {
-                setNewUser({ ...newUser, username: e.target.value });
-              }}
+              onChange={(e) => handleInputChange("username", e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -117,9 +114,7 @@ export function Add({
               id="password"
               type="password"
               value={newUser.password}
-              onChange={(e) => {
-                setNewUser({ ...newUser, password: e.target.value });
-              }}
+              onChange={(e) => handleInputChange("password", e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -129,9 +124,9 @@ export function Add({
             </Label>
             <Select
               value={newUser.role}
-              onValueChange={(value: "admin" | "user") => {
-                setNewUser({ ...newUser, role: value });
-              }}
+              onValueChange={(value: "admin" | "user") =>
+                handleInputChange("role", value)
+              }
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Choose role" />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import type { User } from "@schema";
 import { Input } from "@/components/ui/input";
@@ -10,18 +10,16 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 import {
   Table,
   TableBody,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { UserRecord } from "./record";
 import { Add } from "./add";
 
@@ -49,12 +47,10 @@ export default function Users() {
       setDebouncedSearch(searchInput);
     }, 50);
 
-    return () => {
-      clearTimeout(timerId);
-    };
+    return () => clearTimeout(timerId);
   }, [searchInput]);
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:1337/api/users/sessions", {
         credentials: "include",
@@ -69,19 +65,18 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   const crud: Crud = {
-    // TODO: implement adding users
-    add: (user: UserWithSession) => {
+    add: () => {
       fetchUsers();
     },
-    update: (user: UserWithSession) => {
+    update: (newUser: User) => {
       setUsers((prevUsers) =>
-        prevUsers.map((u) => (u.id === user.id ? { ...u, ...user } : u)),
+        prevUsers.map((u) => (u.id === newUser.id ? { ...u, ...newUser } : u)),
       );
     },
-    delete: (user: UserWithSession) => {
+    delete: (user: User) => {
       setUsers((prevState) => prevState.filter((u) => u.id !== user.id));
     },
     logout: (user: UserWithSession) => {
@@ -93,41 +88,43 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   // Memoize filtered users based on debounced search value
   const filteredUsers = useMemo(() => {
     if (!debouncedSearch) return users;
 
-    return users.filter((user) => {
-      return (
+    return users.filter(
+      (user) =>
         user.id.toString().includes(debouncedSearch) ||
         user.username.includes(debouncedSearch) ||
-        user.role.includes(debouncedSearch)
-      );
-    });
+        user.role.includes(debouncedSearch),
+    );
   }, [users, debouncedSearch]);
 
-  if (loading) return <h1> Loading </h1>;
+  if (loading) return <h1>Loading</h1>;
 
   return (
     <>
       <Card>
         <CardHeader>
-          <div className="flex gap-2 justify-center">
-            <CardTitle className="flex-1 text-lg">Users</CardTitle>
+          <div className="flex gap-2 justify-start">
             <Input
               placeholder="Search users"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              className="flex-1"
             />
             <Button variant="outline" onClick={() => setAddOpen(true)}>
               <Plus />
             </Button>
+            <Button variant="outline" onClick={fetchUsers}>
+              <RefreshCw />
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[50vh]">
+          <ScrollArea className="h-[30vh]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -135,7 +132,6 @@ export default function Users() {
                   <TableHead>Username</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Active</TableHead>
-                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -146,7 +142,7 @@ export default function Users() {
             </Table>
           </ScrollArea>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-0">
           {`${filteredUsers.length} of ${users.length} users`}
         </CardFooter>
       </Card>

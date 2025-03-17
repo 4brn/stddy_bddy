@@ -16,7 +16,7 @@ export function UserRecord({
       <TableCell>{user.id}</TableCell>
       <TableCell>{user.username}</TableCell>
       <TableCell>{user.role}</TableCell>
-      <TableCell>{user.active ? "Active" : "Not Active"}</TableCell>
+      <TableCell>{user.active ? "True" : "False"}</TableCell>
       <TableCell>
         <Menu user={user} crud={crud} />
       </TableCell>

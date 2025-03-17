@@ -7,7 +7,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { Crud } from "./users";
 import type { User } from "@schema";
@@ -29,10 +28,12 @@ export function Delete({
       method: "DELETE",
       credentials: "include",
     });
-    if (!response.ok) toast.error("Could not delete user");
+
     if (response.ok) {
       toast.success(`Deleted ${user.username}`);
       crud.delete(user);
+    } else {
+      toast.error("Could Not Delete User");
     }
   };
 
