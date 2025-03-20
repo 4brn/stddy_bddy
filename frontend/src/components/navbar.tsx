@@ -18,7 +18,7 @@ const LogIn = () => {
 export default function NavBar() {
   const { user } = useAuth()!;
   return (
-    <div className="flex p-2 gap-1 sticky top-0 z-50 ">
+    <div className="flex p-2 gap-1 sticky top-0 z-50 bg-background">
       <div className="flex-1">
         <Link to={user ? "/dashboard" : "/"} className="font-bold text-2xl">
           StddyBddy

@@ -124,14 +124,14 @@ export default function Users() {
           </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[30vh]">
+          <ScrollArea className="h-[30vh] border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Id</TableHead>
+                  <TableHead className="text-center">Id</TableHead>
                   <TableHead>Username</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Active</TableHead>
+                  <TableHead className="hidden sm:table-cell">Active</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -142,7 +142,7 @@ export default function Users() {
             </Table>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="pt-0">
+        <CardFooter className="text-gray-400 pt-0">
           {`${filteredUsers.length} of ${users.length} users`}
         </CardFooter>
       </Card>

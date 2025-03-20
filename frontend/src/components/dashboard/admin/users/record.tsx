@@ -13,10 +13,12 @@ export function UserRecord({
 }) {
   return (
     <TableRow>
-      <TableCell>{user.id}</TableCell>
+      <TableCell className="text-center">{user.id}</TableCell>
       <TableCell>{user.username}</TableCell>
       <TableCell>{user.role}</TableCell>
-      <TableCell>{user.active ? "True" : "False"}</TableCell>
+      <TableCell className="hidden sm:table-cell">
+        {user.active ? "True" : "False"}
+      </TableCell>
       <TableCell>
         <Menu user={user} crud={crud} />
       </TableCell>

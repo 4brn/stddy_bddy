@@ -3,12 +3,12 @@ import * as lib from "@/utils/session";
 import { db } from "@/db";
 import { sessionsTable, usersTable } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { User } from "@/utils/validation";
+import { UserSchema } from "@/utils/validation";
 import { Error } from "@/utils/error";
 import { password } from "bun";
 import logger from "@/utils/logger";
 
-const UserCreation = User.omit({ id: true });
+const UserCreation = UserSchema.omit({ id: true });
 
 export async function getUsers(req: Request, res: Response) {
   const token = lib.getSessionFromCookie(req);
@@ -189,7 +189,7 @@ export async function updateUser(req: Request, res: Response) {
   lib.setSessionCookie(res, token, session.expiresAt);
 
   const id: number = Number(req.params.id);
-  const { success, data, error } = await User.safeParseAsync(req.body);
+  const { success, data, error } = await UserSchema.safeParseAsync(req.body);
 
   if (!success || isNaN(id)) {
     res.status(400).send({

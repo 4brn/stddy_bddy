@@ -5,10 +5,10 @@ import { db } from "@/db";
 import { usersTable } from "@/db/schema";
 import * as lib from "@/utils/session";
 import { Error } from "@/utils/error";
-import { User } from "@/utils/validation";
+import { UserSchema } from "@/utils/validation";
 import logger from "@/utils/logger";
 
-const AuthUser = User.omit({ role: true, id: true });
+const AuthUser = UserSchema.omit({ role: true, id: true });
 
 export async function handleRegister(req: Request, res: Response) {
   const token = lib.getSessionFromCookie(req);
