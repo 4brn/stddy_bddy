@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth_context";
-import { LogOut as Icon } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export default function LogOut() {
+export default function Logout() {
   const { setUser } = useAuth()!;
   const navigate = useNavigate();
 
@@ -20,8 +20,9 @@ export default function LogOut() {
   };
 
   return (
-    <Button onClick={handleLogout}>
-      <Icon />
+    <Button variant={"destructive"} onClick={handleLogout}>
+      <LogOut strokeWidth={3} />
+      Exit
     </Button>
   );
 }

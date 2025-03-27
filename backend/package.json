@@ -1,32 +1,33 @@
 {
   "name": "backend",
+  "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "bun run --watch ./src/server.ts",
-    "prod": "bun run ./src/server.ts",
-    "db:studio": "bunx drizzle-kit studio",
-    "db:migrate": "bunx drizzle-kit migrate"
+    "start": "bun run ./src/server.ts",
+    "studio": "bunx drizzle-kit studio",
+    "push": "bunx drizzle-kit push"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.4",
+    "@types/bun": "^1.2.5",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.13.5",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.10",
     "drizzle-kit": "^0.30.5",
     "pino-pretty": "^13.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@libsql/client": "^0.14.0",
+    "@libsql/client": "^0.15.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "^0.40.1",
     "drizzle-zod": "^0.7.0",
-    "express": "^5",
+    "express": "^5.0.1",
     "pino": "^9.6.0",
     "zod": "^3.24.2"
   }

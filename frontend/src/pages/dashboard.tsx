@@ -1,17 +1,15 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import { useAuth } from "@/context/auth_context";
-import AdminDashboard from "@/components/dashboard/admin/admin_dashboard";
+import { useAuth } from "@/context/auth-context";
+import AdminDashboard from "@/components/dashboard/admin/admin-dashboard";
+import Choice from "@/components/choice";
+import UserDashboard from "@/components/dashboard/user/user-dashboard";
 
-function Dashboard() {
+export default function Dashboard() {
   const { user } = useAuth()!;
-  const navigate = useNavigate();
+  if (!user) return <Choice />;
 
-  useEffect(() => {
-    if (!user) navigate("/");
-  }, [user]);
-
-  return user?.role === "admin" ? <AdminDashboard /> : "User dashboard";
+  return (
+    <div className="p-6 flex flex-col gap-6 xl:grid xl:grid-cols-2 xl:justify-center">
+      {user.role === "admin" ? <AdminDashboard /> : <UserDashboard />}
+    </div>
+  );
 }
-
-export default Dashboard;

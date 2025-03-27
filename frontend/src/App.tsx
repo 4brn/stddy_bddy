@@ -1,17 +1,29 @@
 import "@/index.css";
-import { BrowserRouter, Routes, Route } from "react-router";
 import { useEffect } from "react";
-
-import { ThemeProvider } from "@/context/theme_context";
-import { AuthProvider, useAuth } from "@/context/auth_context";
-import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/context/theme-context";
+import { AuthProvider, useAuth } from "@/context/auth-context";
+import { BrowserRouter, Routes, Route } from "react-router";
+import { Toaster } from "./components/ui/sonner";
 
 import Home from "@/pages/home";
 import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
-import PageLayout from "@/layouts/page_layout";
+import PageLayout from "@/layouts/page";
+import NotFound from "@/pages/404";
+import Tests from "@/pages/tests";
 
-const Router = () => {
+export default function App() {
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="theme">
+      <AuthProvider>
+        <Routing />
+        <Toaster richColors={true} expand={false} />
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+function Routing() {
   const { setUser } = useAuth()!;
 
   useEffect(() => {
@@ -34,25 +46,14 @@ const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={PageLayout()}>
-          <Route index element={<Home />} />
+        <Route element={<PageLayout />}>
+          <Route path="/" element={<Home />} />
           <Route path="auth" element={<Auth />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="tests" element={<Tests />} />
         </Route>
+        <Route path="/404" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
-};
-
-export function App() {
-  return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <Router />
-        <Toaster expand={true} />
-      </AuthProvider>
-    </ThemeProvider>
-  );
 }
-
-export default App;

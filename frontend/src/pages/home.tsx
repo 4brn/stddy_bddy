@@ -1,37 +1,24 @@
-import { useAuth } from "@/context/auth_context";
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
+import { Link } from "react-router";
 
-function Home() {
+export default function Home() {
   const { user } = useAuth()!;
-  const navigate = useNavigate();
-
-  // Handle keyboard events for Enter key
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter") {
-        navigate("/auth");
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigate]);
-
-  useEffect(() => {
-    if (user) navigate("/dashboard");
-  }, [user]);
-
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm text-center">
-        <Link to={"/auth"}>
-          <h1 className="font-bold text-5xl w-full">StddyBddy</h1>
+    <div className="flex min-h-svh items-center justify-center p-6 md:p-10">
+      <div className="flex flex-col items-center justify-center gap-5">
+        <h1 className="font-bold leading-tight text-5xl">
+          Welcome {user ? user.username : "to StddyBddy"}
+        </h1>
+        <p className="text-xl text-accent-foreground">
+          Become an academic weapon
+        </p>
+        <Link to={user ? "/dashboard" : "/auth"}>
+          <Button size={"lg"} className="text-xl p-6">
+            Learn
+          </Button>
         </Link>
-        <p className="text-lg mt-3">StddyBddy {">"} Kahoot</p>
       </div>
     </div>
   );
 }
-
-export default Home;

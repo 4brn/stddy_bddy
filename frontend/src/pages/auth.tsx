@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoginForm } from "@/components/auth/login-form";
-import { RegisterForm } from "@/components/auth/register-form";
-import { useAuth } from "@/context/auth_context";
+import Login from "@/components/auth/login";
+import Register from "@/components/auth/register";
+import { useAuth } from "@/context/auth-context";
 import { useNavigate } from "react-router";
 
 export default function Auth() {
@@ -16,21 +16,19 @@ export default function Auth() {
   }, [user]);
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <Tabs defaultValue="login" className="w-[400px]">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login">
-            <LoginForm />
-          </TabsContent>
-          <TabsContent value="register">
-            <RegisterForm />
-          </TabsContent>
-        </Tabs>
-      </div>
+    <div className="flex min-h-svh items-center justify-center">
+      <Tabs defaultValue="login" className="w-[400px]">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="register">Register</TabsTrigger>
+        </TabsList>
+        <TabsContent value="login">
+          <Login />
+        </TabsContent>
+        <TabsContent value="register">
+          <Register />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

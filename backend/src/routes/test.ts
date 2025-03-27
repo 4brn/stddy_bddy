@@ -1,6 +1,6 @@
 // stddy_bddy/backend/src/routes/test.ts
 import { Router } from "express";
-import * as test from "@/services/test";
+import * as test from "@/lib/test";
 
 const router = Router();
 
@@ -26,6 +26,7 @@ router.patch("/tests/:id", test.updateTest);
 router.delete("/tests/:id", test.deleteTest);
 
 // Like or unlike a test
-router.post("/tests/:id/like", test.toggleLike);
+router.post("/tests/:id/like", test.Like);
+router.post("/tests/:id/dislike", test.Dislike);
 
 export default router;

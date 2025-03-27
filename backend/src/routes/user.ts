@@ -1,20 +1,14 @@
 import { Router } from "express";
-import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  logoutUser,
-  getUsersWithSessions,
-} from "@/services/user";
+import * as user from "@/lib/user";
 
 const router = Router();
 
-router.get("/users", getUsers);
-router.get("/users/sessions", getUsersWithSessions);
-router.post("/users", createUser);
-router.patch("/users/:id", updateUser);
-router.delete("/users/:id", deleteUser);
-router.delete("/users/logout/:id", logoutUser);
+router.get("/users", user.getUsers);
+router.get("/users/:id", user.getUser);
+router.get("/users/with/sessions", user.getUsersWithSessions);
+router.post("/users", user.createUser);
+router.patch("/users/:id", user.updateUser);
+router.delete("/users/:id", user.deleteUser);
+router.delete("/users/logout/:id", user.logoutUser);
 
 export default router;
