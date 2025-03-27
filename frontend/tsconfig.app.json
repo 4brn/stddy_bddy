@@ -7,6 +7,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
@@ -14,6 +15,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -24,9 +26,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../shared/*"],
-      "@schema": ["../backend/src/db"],
       "@validation": ["../shared/validation"],
-      "@types": ["../shared/types"]
+      "@types": ["../shared/types"],
+      "@schema": ["../backend/src/db"]
     }
   },
   "include": ["src"]
