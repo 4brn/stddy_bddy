@@ -8,13 +8,10 @@ const router = Router();
 router.get("/tests", test.getTests);
 
 // Get tests created by current user
-router.get("/tests/my", test.getMyTests);
+router.get("/my/tests", test.getMyTests);
 
 // Get a specific test by ID
 router.get("/tests/:id", test.getTestById);
-
-// Get count of likes for a test
-router.get("/tests/:id/likes", test.getLikes);
 
 // Create a new test
 router.post("/tests", test.createTest);
@@ -25,8 +22,5 @@ router.patch("/tests/:id", test.updateTest);
 // Delete a test
 router.delete("/tests/:id", test.deleteTest);
 
-// Like or unlike a test
-router.post("/tests/:id/like", test.Like);
-router.post("/tests/:id/dislike", test.Dislike);
 
 export default router;

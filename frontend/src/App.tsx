@@ -11,6 +11,7 @@ import Dashboard from "@/pages/dashboard";
 import PageLayout from "@/layouts/page";
 import NotFound from "@/pages/404";
 import Tests from "@/pages/tests";
+import DashboardLayout from "./layouts/dashboard";
 
 export default function App() {
   return (
@@ -49,7 +50,9 @@ function Routing() {
         <Route element={<PageLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="auth" element={<Auth />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+          </Route>
           <Route path="tests" element={<Tests />} />
         </Route>
         <Route path="/404" element={<NotFound />} />

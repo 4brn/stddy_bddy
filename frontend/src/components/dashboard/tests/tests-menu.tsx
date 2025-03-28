@@ -15,7 +15,6 @@ import { useState } from "react";
 import TestView from "./crud/test-view";
 import TestEdit from "./crud/test-edit";
 import TestDelete from "./crud/test-delete";
-// import View from "./view";
 
 export default function TestMenu({ test, crud }: { test: Test; crud: Crud }) {
   const [editOpen, setEditOpen] = useState(false);

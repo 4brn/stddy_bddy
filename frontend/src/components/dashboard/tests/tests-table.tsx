@@ -10,13 +10,17 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { File, Plus, RefreshCw } from "lucide-react";
-import type { TestSelect as Test, TestCrud as Crud } from "@shared/types";
+import type {
+  TestSelect as Test,
+  TestCrud as Crud,
+  UserSelect as User,
+} from "@shared/types";
 import { Label } from "@/components/ui/label";
 import { Loading } from "@/components/loading";
 import TestMenu from "./tests-menu";
 import TestAdd from "./crud/test-add";
 
-export default function TestsTable() {
+export default function TestsTable({ user }: { user: User }) {
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Test[]>([]);
   const [searchInput, setSearchInput] = useState("");
@@ -33,9 +37,13 @@ export default function TestsTable() {
 
   const fetchTests = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:1337/api/tests", {
-        credentials: "include",
-      });
+      console.log(user.role);
+      const response = await fetch(
+        `http://localhost:1337/api/${user.role === "admin" ? "tests" : "my/tests"}`,
+        {
+          credentials: "include",
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to fetch tests");
 
@@ -50,7 +58,7 @@ export default function TestsTable() {
 
   const crud: Crud = useMemo(
     () => ({
-      add: (test: Test) => fetchTests(),
+      add: async () => await fetchTests(),
       update: (newTest: Test) =>
         setTests((prev) =>
           prev.map((t) => (t.id === newTest.id ? { ...t, ...newTest } : t)),
