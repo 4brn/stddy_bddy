@@ -1,5 +1,5 @@
 import { type Request, type Response } from "express";
-import { db, sessionsTable, usersTable } from "@/db";
+import { db, likesTable, sessionsTable, testsTable, usersTable } from "@/db";
 import { eq, sql } from "drizzle-orm";
 import { UserValidationSchema } from "@shared/validation";
 import type { UserInsert } from "@shared/types";
@@ -230,6 +230,17 @@ export async function deleteUser(req: Request, res: Response) {
   }
 
   try {
+    const deletedUser = (
+      await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.username, "deleted_user"))
+    )[0];
+
+    await db
+      .update(testsTable)
+      .set({ author_id: deletedUser.id })
+      .where(eq(testsTable.author_id, id));
     await db.delete(sessionsTable).where(eq(sessionsTable.user_id, id));
     await db.delete(usersTable).where(eq(usersTable.id, id));
   } catch (error) {
