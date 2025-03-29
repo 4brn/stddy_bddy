@@ -37,6 +37,7 @@ export default function UsersTable() {
   }, [searchInput]);
 
   const fetchUsers = useCallback(async () => {
+    const timer = setTimeout(() => setLoading(false), 300);
     try {
       const response = await fetch(
         "http://localhost:1337/api/users/with/sessions",
@@ -50,7 +51,7 @@ export default function UsersTable() {
     } catch (error) {
       toast.error("Failed to load users");
     } finally {
-      setLoading(false);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -117,11 +118,11 @@ export default function UsersTable() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[33svh]">
           {loading ? (
             <Loading />
           ) : (
-            <ScrollArea className="h-[50vh] border rounded-md">
+            <ScrollArea className="h-full border rounded-md">
               <div className="p-3 gap-3 grid grid-cols-3 sticky top-0 z-10 bg-card items-center border-b sm:grid-cols-4 md:grid-cols-5">
                 <span className="pl-3">Id</span>
                 <span>Username</span>
@@ -131,8 +132,8 @@ export default function UsersTable() {
                   Options
                 </span>
               </div>
-              {filteredUsers.map((user) => (
-                <div key={user.id}>
+              {filteredUsers.map((user, i) => (
+                <div key={i}>
                   <div className="p-3 gap-3 grid grid-cols-3 hover:bg-accent/50 items-center border-t sm:grid-cols-4 md:grid-cols-5">
                     <span className="pl-3">{user.id}</span>
                     <span className="truncate">{user.username}</span>

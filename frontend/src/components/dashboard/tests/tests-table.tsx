@@ -64,6 +64,7 @@ export default function TestsTable({ user }: { user: User }) {
   }, [searchInput]);
 
   const fetchTests = useCallback(async () => {
+    const timer = setTimeout(() => setLoading(false), 300);
     try {
       const response = await fetch(
         `http://localhost:1337/api/${user.role === "admin" ? "tests" : "my/tests"}`,
@@ -79,7 +80,7 @@ export default function TestsTable({ user }: { user: User }) {
     } catch (error) {
       toast.error("Failed to load tests");
     } finally {
-      setLoading(false);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -125,7 +126,7 @@ export default function TestsTable({ user }: { user: User }) {
           <div className="flex gap-2 justify-start">
             <Label htmlFor="search" className="text-lg">
               <File strokeWidth={2} />
-              Tests
+              {user.role === "user" && "My"} Tests
             </Label>
             <Input
               placeholder="search"
@@ -141,11 +142,11 @@ export default function TestsTable({ user }: { user: User }) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[33svh]">
           {loading ? (
             <Loading />
           ) : (
-            <ScrollArea className="h-[50vh] border rounded-md">
+            <ScrollArea className="h-full border rounded-md">
               <div className="p-3 gap-3 grid grid-cols-3 sticky top-0 z-10 bg-card items-center border-b sm:grid-cols-4 md:grid-cols-6">
                 <span className="pl-3">Id</span>
                 <span>Title</span>
@@ -154,8 +155,8 @@ export default function TestsTable({ user }: { user: User }) {
                 <span className="hidden md:block">Updated</span>
                 <span>Options</span>
               </div>
-              {filteredTests.map((test) => (
-                <div key={test.id}>
+              {filteredTests.map((test, i) => (
+                <div key={i}>
                   <div className="p-3 gap-3 grid grid-cols-3 hover:bg-accent/50 items-center border-t sm:grid-cols-4 md:grid-cols-6">
                     <span className="pl-3">{test.id}</span>
                     <span className="truncate">{test.title}</span>
