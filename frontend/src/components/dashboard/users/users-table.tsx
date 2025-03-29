@@ -127,7 +127,9 @@ export default function UsersTable() {
                 <span>Username</span>
                 <span className="hidden sm:block">Role</span>
                 <span className="hidden md:block">Activity</span>
-                <span className="hidden sm:block">Options</span>
+                <span className="justify-self-center sm:justify-self-start">
+                  Options
+                </span>
               </div>
               {filteredUsers.map((user) => (
                 <div key={user.id}>

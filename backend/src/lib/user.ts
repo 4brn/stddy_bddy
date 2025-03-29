@@ -48,7 +48,7 @@ export async function getUsers(req: Request, res: Response) {
   }
 
   const { user, session } = await validateSession(token);
-  if (!session || user.role !== "admin") {
+  if (!session) {
     res.status(401).send({ error: "Unauthorized" });
     return;
   }

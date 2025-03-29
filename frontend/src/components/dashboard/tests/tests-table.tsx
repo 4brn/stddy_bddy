@@ -14,6 +14,7 @@ import type {
   TestSelect as Test,
   TestCrud as Crud,
   UserSelect as User,
+  CategorySelect as Category,
 } from "@shared/types";
 import { Label } from "@/components/ui/label";
 import { Loading } from "@/components/loading";
@@ -26,6 +27,33 @@ export default function TestsTable({ user }: { user: User }) {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch("http://localhost:1337/api/users", {
+        credentials: "include",
+      });
+
+      if (!response.ok) return;
+      const json = await response.json();
+      setUsers(json.data);
+    };
+
+    const fetchCategories = async () => {
+      const response = await fetch("http://localhost:1337/api/categories", {
+        credentials: "include",
+      });
+
+      if (!response.ok) return;
+      const json = await response.json();
+      setCategories(json.data);
+    };
+
+    fetchUsers();
+    fetchCategories();
+  }, []);
 
   // Handle search input with debouncing
   useEffect(() => {
@@ -37,7 +65,6 @@ export default function TestsTable({ user }: { user: User }) {
 
   const fetchTests = useCallback(async () => {
     try {
-      console.log(user.role);
       const response = await fetch(
         `http://localhost:1337/api/${user.role === "admin" ? "tests" : "my/tests"}`,
         {
@@ -142,8 +169,13 @@ export default function TestsTable({ user }: { user: User }) {
                     <span className="hidden md:block">
                       {new Date(test.updated_at).toLocaleDateString()}
                     </span>
-                    <span className="justify-self-center sm:justify-self-start">
-                      <TestMenu crud={crud} test={test} />
+                    <span>
+                      <TestMenu
+                        crud={crud}
+                        test={test}
+                        users={users}
+                        categories={categories}
+                      />
                     </span>
                   </div>
                 </div>
@@ -156,7 +188,13 @@ export default function TestsTable({ user }: { user: User }) {
         </CardFooter>
       </Card>
 
-      <TestAdd open={addOpen} onOpenChange={setAddOpen} crud={crud} />
+      <TestAdd
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        crud={crud}
+        users={users}
+        categories={categories}
+      />
     </>
   );
 }

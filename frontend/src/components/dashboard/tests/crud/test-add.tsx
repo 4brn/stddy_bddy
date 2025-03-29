@@ -1,4 +1,10 @@
-import type { Question, TestCrud as Crud, Answer } from "@shared/types";
+import type {
+  Question,
+  TestCrud as Crud,
+  Answer,
+  UserSelect as User,
+  CategorySelect as Category,
+} from "@shared/types";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -29,6 +35,14 @@ import {
 } from "@/components/ui/accordion";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -43,16 +57,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
 
 export default function TestAdd({
   open,
   onOpenChange,
   crud,
+  users,
+  categories,
 }: {
   open: boolean;
   onOpenChange: (state: boolean) => void;
   crud: Crud;
+  users: User[];
+  categories: Category[];
 }) {
+  const { user } = useAuth()!;
   const [newTest, setNewTest] = useState({
     title: "",
     is_private: false,
@@ -87,6 +107,14 @@ export default function TestAdd({
 
   const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setNewTest((prev) => ({ ...prev, title: e.target.value }));
+  }, []);
+
+  const handleCategoryChange = useCallback((categoryId: number) => {
+    setNewTest((prev) => ({ ...prev, category_id: categoryId }));
+  }, []);
+
+  const handleAuthorChange = useCallback((authorId: number) => {
+    setNewTest((prev) => ({ ...prev, author_id: authorId }));
   }, []);
 
   const reset = () => {
@@ -246,6 +274,49 @@ export default function TestAdd({
             </Button>
           </DialogTitle>
           <DialogDescription></DialogDescription>
+          <div className="flex flex-col gap-2">
+            {user && user.role === "admin" && (
+              <div className="flex gap-1">
+                <Label>Author: </Label>
+                <Select
+                  onValueChange={(authorId) =>
+                    handleAuthorChange(Number(authorId))
+                  }
+                  defaultValue={user.id.toString()}
+                >
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Author" />
+                  </SelectTrigger>
+                  <SelectContent className="h-[200px]">
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.username}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex gap-1">
+              <Label>Category: </Label>
+              <Select
+                onValueChange={(categoryId) =>
+                  handleCategoryChange(Number(categoryId))
+                }
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent className="h-[200px]">
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </DialogHeader>
         <ScrollArea className="h-[60vh]">
           <Accordion type="multiple">

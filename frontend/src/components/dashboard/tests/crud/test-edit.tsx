@@ -2,6 +2,8 @@ import type {
   Question,
   TestSelect as Test,
   TestCrud as Crud,
+  CategorySelect as Category,
+  UserSelect as User,
 } from "@shared/types";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +15,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   AlertDialog,
@@ -48,18 +58,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
 
 export default function TestEdit({
   open,
   onOpenChange,
   crud,
   test,
+  users,
+  categories,
 }: {
   open: boolean;
   onOpenChange: (state: boolean) => void;
   crud: Crud;
   test: Test;
+  users: User[];
+  categories: Category[];
 }) {
+  const { user } = useAuth()!;
   const [updatedTest, setUpdatedTest] = useState<Test>(test);
   const [alertOpen, setAlertOpen] = useState(false);
 
@@ -99,6 +115,14 @@ export default function TestEdit({
     }
   };
 
+  const handleCategoryChange = useCallback((categoryId: number) => {
+    setUpdatedTest((prev) => ({ ...prev, category_id: categoryId }));
+  }, []);
+
+  const handleAuthorChange = useCallback((authorId: number) => {
+    setUpdatedTest((prev) => ({ ...prev, author_id: authorId }));
+  }, []);
+
   const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setUpdatedTest((prev) => ({ ...prev, title: e.target.value }));
   }, []);
@@ -129,7 +153,6 @@ export default function TestEdit({
       ...prev,
       questions: [...prev.questions, newQuestion],
     }));
-    toast.info(`Added question`);
   }, [updatedTest.questions]);
 
   const handleQuestionUpdate = useCallback(
@@ -251,12 +274,56 @@ export default function TestEdit({
               <RefreshCw />
             </Button>
           </DialogTitle>
-          <DialogDescription className="text-start grid grid-cols-1 sm:grid-cols-2 mt-2">
+          <DialogDescription></DialogDescription>
+          <div className="text-start flex flex-col gap-2 mt-2">
             <span>Id: {test.id}</span>
-            <span>Created: {created}</span>
-            <span>Author: {test.author_id}</span>
+            {user && user.role === "admin" ? (
+              <div className="flex gap-1">
+                <span>Author: </span>
+                <Select
+                  onValueChange={(authorId) =>
+                    handleAuthorChange(Number(authorId))
+                  }
+                  defaultValue={test.author_id.toString()}
+                >
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Author" />
+                  </SelectTrigger>
+                  <SelectContent className="h-[200px]">
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.username}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <span>Author: {test.author_id}</span>
+            )}
+            <div className="flex gap-1">
+              <span>Category: </span>
+              <Select
+                onValueChange={(categoryId) =>
+                  handleCategoryChange(Number(categoryId))
+                }
+                defaultValue={test.category_id.toString()}
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent className="h-[200px]">
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <span>Updated: {updated}</span>
-          </DialogDescription>
+            <span>Created: {created}</span>
+          </div>
         </DialogHeader>
         <ScrollArea className="h-[60vh]">
           <Accordion type="multiple">
@@ -273,16 +340,15 @@ export default function TestEdit({
                     value={question.text}
                     className="flex-1"
                   />
-                  <Button
-                    variant="outline"
+                  <div
                     onClick={(e) => {
                       stopPropagation(e);
                       handleQuestionDelete(question.id);
                     }}
-                    size={"icon"}
+                    className="border-2 p-2 rounded-md bg-background hover:bg-accent"
                   >
-                    <Trash color="red" />
-                  </Button>
+                    <Trash size={18} color="red" />
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2 mr-6">
                   {question.answers.map((answer, i) => (

@@ -3,6 +3,7 @@ import {
   sessionsTable,
   testsTable,
   likesTable,
+  categoriesTable,
 } from "../backend/src/db";
 
 export type UserSelect = typeof usersTable.$inferSelect;
@@ -10,6 +11,9 @@ export type UserInsert = typeof usersTable.$inferInsert;
 
 export type SessionSelect = typeof sessionsTable.$inferSelect;
 export type SessionInsert = typeof sessionsTable.$inferInsert;
+
+export type CategorySelect = typeof categoriesTable.$inferSelect;
+export type CategoryInsert = typeof categoriesTable.$inferInsert;
 
 export type TestSelect = typeof testsTable.$inferSelect;
 export type TestInsert = typeof testsTable.$inferInsert;

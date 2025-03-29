@@ -1,4 +1,9 @@
-import type { Question, TestSelect as Test } from "@shared/types";
+import type {
+  Question,
+  TestSelect as Test,
+  UserSelect as User,
+  CategorySelect as Category,
+} from "@shared/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
@@ -56,13 +61,22 @@ export default function TestView({
   open,
   onOpenChange,
   test,
+  users,
+  categories,
 }: {
   open: boolean;
   onOpenChange: (state: boolean) => void;
   test: Test;
+  users: User[];
+  categories: Category[];
 }) {
   const created = new Date(test.created_at).toLocaleDateString();
   const updated = new Date(test.updated_at).toLocaleDateString();
+  const author =
+    users.find((u) => u.id === test.author_id)?.username ?? test.author_id;
+  const category =
+    categories.find((c) => c.id === test.category_id)?.category ??
+    test.category_id;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,11 +90,10 @@ export default function TestView({
           <DialogDescription className="text-start grid grid-cols-1 sm:grid-cols-2">
             <span>Id: {test.id}</span>
             <span>Created: {created}</span>
-            <span>Author: {test.author_id}</span>
+            <span>Author: {author}</span>
             <span>Updated: {updated}</span>
-            <span className="sm:col-span-2">
-              Visibility: {test.is_private ? "Private" : "Public"}
-            </span>
+            <span>Visibility: {test.is_private ? "Private" : "Public"}</span>
+            <span>Cagetory: {category}</span>
           </DialogDescription>
         </DialogHeader>
         <Accordion type="multiple">

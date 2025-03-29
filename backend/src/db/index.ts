@@ -11,7 +11,9 @@ export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }).notNull(),
   username: text().unique().notNull(),
   password: text().notNull(),
-  role: text({ enum: ["admin", "user"] }).notNull(),
+  role: text({ enum: ["admin", "user"] })
+    .default("user")
+    .notNull(),
 });
 
 export const sessionsTable = sqliteTable("sessions", {
@@ -29,9 +31,18 @@ export const testsTable = sqliteTable("tests", {
     .notNull(),
   title: text().notNull(),
   is_private: int("private", { mode: "boolean" }).notNull(),
+  category_id: int("category_id")
+    .references(() => categoriesTable.id)
+    .default(1)
+    .notNull(),
   questions: text({ mode: "json" }).$type<Question[]>().notNull(),
   created_at: int("created_at", { mode: "timestamp" }).notNull(),
   updated_at: int("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const categoriesTable = sqliteTable("categories", {
+  id: int().primaryKey({ autoIncrement: true }).notNull(),
+  category: text().notNull(),
 });
 
 export const likesTable = sqliteTable("likes", {

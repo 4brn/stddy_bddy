@@ -1,4 +1,4 @@
-import { db, usersTable, testsTable } from "@/db";
+import { db, usersTable, testsTable, categoriesTable } from "@/db";
 import type { UserInsert, TestInsert, Question } from "@shared/types";
 import { password as p } from "bun";
 import { exit } from "process";
@@ -7,7 +7,7 @@ async function hash(password: string) {
   return await p.hash(password, "bcrypt");
 }
 
-const seedUsers = async () => {
+async function seedUsers() {
   const users: UserInsert[] = [];
   users.push({
     username: "admin",
@@ -30,9 +30,27 @@ const seedUsers = async () => {
 
   await db.insert(usersTable).values(users);
   console.info("Users seed: Success");
-};
+}
 
-const seedTests = async () => {
+async function seedCategories() {
+  const categories = [
+    "misc",
+    "mathematics",
+    "biology",
+    "chemistry",
+    "physics",
+    "literature",
+    "history",
+    "geography",
+    "programming",
+  ];
+  for (let cat of categories) {
+    await db.insert(categoriesTable).values({ category: cat });
+  }
+  console.info("Categories seed: Success");
+}
+
+async function seedTests() {
   const tests: TestInsert[] = [];
   const questions: Question[] = [];
 
@@ -55,6 +73,7 @@ const seedTests = async () => {
       author_id: i,
       title: `Test ${i}`,
       is_private: false,
+      category: 1,
       questions: [...questions],
       created_at: new Date(),
       updated_at: new Date(),
@@ -63,14 +82,24 @@ const seedTests = async () => {
 
   await db.insert(testsTable).values(tests);
   console.info("Tests seed: Success");
-};
+}
 
 const users = prompt("Seed users y/n? ");
 if (users && users.toLowerCase() === "y") {
   try {
     await seedUsers();
   } catch (err) {
-    console.error("User Seed Error");
+    console.error("User seed error");
+  }
+}
+
+const categories = prompt("Seed categories y/n? ");
+if (categories && categories.toLowerCase() === "y") {
+  try {
+    await seedCategories();
+  } catch (err) {
+    console.error("Categories seed srror");
+    console.error(err);
   }
 }
 
@@ -79,6 +108,6 @@ if (tests && tests.toLowerCase() === "y") {
   try {
     await seedTests();
   } catch (err) {
-    console.error("Test Seed Error");
+    console.error("Test seed error");
   }
 }

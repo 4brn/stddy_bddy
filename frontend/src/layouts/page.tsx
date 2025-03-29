@@ -6,7 +6,7 @@ export default function PageLayout() {
   return (
     <div className="flex h-screen flex-col">
       <Navbar />
-      <div className="flex-1">
+      <div className="flex-1 p-6">
         <Outlet />
       </div>
       <Footer />

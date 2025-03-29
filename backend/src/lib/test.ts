@@ -125,6 +125,7 @@ export async function createTest(req: Request, res: Response) {
         title: testData.title,
         is_private: testData.is_private,
         questions: testData.questions as Question[],
+        category: testData.category,
         author_id: testData.author_id,
         created_at: testData.created_at,
         updated_at: testData.updated_at,
@@ -140,6 +141,31 @@ export async function createTest(req: Request, res: Response) {
     res.status(500).send({ error: "Internal server error" });
     return;
   }
+}
+
+// Get tests created by the current user
+export async function getMyTests(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+
+  if (!token) {
+    res.status(307).send({ error: "Session expired" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+  setSessionCookie(res, token, session.expires_at);
+
+  const tests = await db
+    .select()
+    .from(testsTable)
+    .where(eq(testsTable.author_id, user.id));
+
+  res.status(200).send({ data: tests });
+  return;
 }
 
 // Update an existing test
@@ -178,7 +204,7 @@ export async function updateTest(req: Request, res: Response) {
 
   // Check if user is authorized to update the test
   if (existingTest[0].author_id !== user.id && user.role !== "admin") {
-    res.status(403).send({ error: "Unauthorized" });
+    res.status(401).send({ error: "Unauthorized" });
     return;
   }
 
@@ -199,6 +225,7 @@ export async function updateTest(req: Request, res: Response) {
     id: data.id,
     title: data.title,
     is_private: data.is_private,
+    category_id: data.category_id,
     questions: data.questions as Question[],
     author_id: data.author_id,
     created_at: data.created_at,
@@ -275,230 +302,6 @@ export async function deleteTest(req: Request, res: Response) {
   } catch (dbError) {
     logger.error(dbError);
     res.status(500).send({ error: "Internal server error" });
-    return;
-  }
-}
-
-// Get tests created by the current user
-export async function getMyTests(req: Request, res: Response) {
-  const token = getSessionFromCookie(req);
-
-  if (!token) {
-    res.status(307).send({ error: "Session expired" });
-    return;
-  }
-
-  const { user, session } = await validateSession(token);
-  if (!session) {
-    res.status(401).send({ error: "Unauthorized" });
-    return;
-  }
-  setSessionCookie(res, token, session.expires_at);
-
-  const tests = await db
-    .select()
-    .from(testsTable)
-    .where(eq(testsTable.author_id, user.id));
-
-  res.status(200).send({ data: tests });
-  return;
-}
-
-// Like or unlike a test
-export async function Like(req: Request, res: Response) {
-  const token = getSessionFromCookie(req);
-  const testId = Number(req.params.id);
-
-  if (isNaN(testId)) {
-    res.status(400).send({ error: "Invalid test id" });
-    return;
-  }
-
-  if (!token) {
-    res.status(307).send({ error: "Session expired" });
-    return;
-  }
-
-  const { user, session } = await validateSession(token);
-
-  if (!session) {
-    res.status(401).send({ error: "Unauthorized" });
-    return;
-  }
-
-  setSessionCookie(res, token, session.expires_at);
-
-  // Verify the test exists
-  const existingTest = await db
-    .select()
-    .from(testsTable)
-    .where(eq(testsTable.id, testId))
-    .limit(1);
-
-  if (existingTest.length === 0) {
-    res.status(404).send({ error: "Test not found" });
-    return;
-  }
-
-  // Check if the test is private and user is not the owner or admin
-  if (existingTest[0].is_private) {
-    res.status(403).send({ error: "Forbidden" });
-    return;
-  }
-
-  try {
-    // Check if user already liked this test
-    const existingLike = await db
-      .select()
-      .from(likesTable)
-      .where(
-        and(eq(likesTable.test_id, testId), eq(likesTable.user_id, user.id)),
-      )
-      .limit(1);
-
-    let message;
-
-    if (existingLike.length > 0) {
-      res.status(200).send({ message: "already liked" });
-      return;
-    }
-
-    // Like: Add a new like
-    await db.insert(likesTable).values({
-      test_id: testId,
-      user_id: user.id,
-    });
-    message = "Test liked";
-
-    res.sendStatus(200);
-    logger.info(`${message}: Test ${testId} by user ${user.id}`);
-    return;
-  } catch (dbError) {
-    logger.error(dbError);
-    res.status(500).send({ error: "Internal server error" });
-    return;
-  }
-}
-
-export async function Dislike(req: Request, res: Response) {
-  const token = getSessionFromCookie(req);
-  const testId = Number(req.params.id);
-
-  if (isNaN(testId)) {
-    res.status(400).send({ error: "Invalid test id" });
-    return;
-  }
-
-  if (!token) {
-    res.status(307).send({ error: "Session expired" });
-    return;
-  }
-
-  const { user, session } = await validateSession(token);
-
-  if (!session) {
-    res.status(401).send({ error: "Unauthorized" });
-    return;
-  }
-
-  setSessionCookie(res, token, session.expires_at);
-
-  // Verify the test exists
-  const existingTest = await db
-    .select()
-    .from(testsTable)
-    .where(eq(testsTable.id, testId))
-    .limit(1);
-
-  if (existingTest.length === 0) {
-    res.status(404).send({ error: "Test not found" });
-    return;
-  }
-
-  if (existingTest[0].is_private) {
-    res.status(403).send({ error: "Forbidden" });
-    return;
-  }
-
-  try {
-    // Check if user already liked this test
-    const existingLike = await db
-      .select()
-      .from(likesTable)
-      .where(
-        and(eq(likesTable.test_id, testId), eq(likesTable.user_id, user.id)),
-      )
-      .limit(1);
-
-    if (existingLike.length < 1) {
-      res.sendStatus(200);
-      return;
-    }
-
-    // Like: Add a new like
-    await db.delete(likesTable).where(eq(likesTable.id, existingLike[0].id));
-
-    res.sendStatus(200);
-    logger.info(`Test ${testId} disliked by user ${user.id}`);
-    return;
-  } catch (dbError) {
-    logger.error(dbError);
-    console.log("here");
-    res.status(500).send({ error: "Internal server error" });
-    return;
-  }
-}
-
-// Get count of likes for a test
-export async function getLikes(req: Request, res: Response) {
-  const token = getSessionFromCookie(req);
-  const testId = Number(req.params.id);
-
-  if (isNaN(testId)) {
-    res.status(400).send({ error: "Invalid test id" });
-    return;
-  }
-
-  if (!token) {
-    res.status(307).send({ error: "Session expired" });
-    return;
-  }
-
-  const { session } = await validateSession(token);
-
-  if (!session) {
-    res.status(401).send({ error: "Unauthorized" });
-    return;
-  }
-
-  setSessionCookie(res, token, session.expires_at);
-
-  // Verify the test exists
-  const existingTest = await db
-    .select()
-    .from(testsTable)
-    .where(eq(testsTable.id, testId))
-    .limit(1);
-
-  if (existingTest.length === 0) {
-    res.status(404).send({ error: "Test not found" });
-    return;
-  }
-
-  try {
-    // Count likes for this test
-    const likes = await db
-      .select()
-      .from(likesTable)
-      .where(eq(likesTable.test_id, testId));
-
-    res.status(200).send({ data: likes });
-    return;
-  } catch (dbError) {
-    logger.error(dbError);
-    res.status(500).send({
-      error: "Internal server error",
-    });
     return;
   }
 }
