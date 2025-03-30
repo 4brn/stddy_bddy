@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { UserSelect as User, Crud } from "@shared/types";
+import type { UserSelect as User, UserCrud as Crud } from "@shared/types";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { User as UserSchema } from "@/lib/validation";
 
 export function Edit({
   user,
@@ -51,13 +52,18 @@ export function Edit({
 
   const handleSubmit = async () => {
     try {
+      const { data, success } = UserSchema.safeParse(newUser);
+      if (!success) {
+        toast.error("Validation error");
+        return;
+      }
       const response = await fetch(
         `http://localhost:1337/api/users/${newUser.id}`,
         {
           method: "PATCH",
           credentials: "include",
           headers: { "Content-type": "application/json" },
-          body: JSON.stringify(newUser),
+          body: JSON.stringify(data),
         },
       );
 
@@ -65,8 +71,8 @@ export function Edit({
         throw new Error("Server responded with an error");
       }
 
-      crud.update(newUser);
-      toast.success(`Updated user: ${user.username}`);
+      crud.update(data);
+      toast.success(`Updated user: ${data.username}`);
       setAlertOpen(false);
       onOpenChange(false);
     } catch (error) {

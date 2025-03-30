@@ -118,7 +118,7 @@ export default function UsersTable() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="h-[33svh]">
+        <CardContent className="h-[50svh]">
           {loading ? (
             <Loading />
           ) : (

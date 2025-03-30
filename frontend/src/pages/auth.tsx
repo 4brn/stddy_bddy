@@ -11,7 +11,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/tests");
     }
   }, [user]);
 

@@ -5,15 +5,11 @@ import TestsTable from "@/components/dashboard/tests/tests-table";
 
 export default function Dashboard() {
   const { user } = useAuth()!;
-  if (!user) return <Choice />;
 
-  return user.role === "admin" ? (
+  if (!user) return <Choice />;
+  return (
     <>
-      <UsersTable />
-      <TestsTable user={user} />
-    </>
-  ) : (
-    <>
+      {user.role === "admin" && <UsersTable />}
       <TestsTable user={user} />
     </>
   );

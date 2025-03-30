@@ -142,7 +142,7 @@ export default function TestsTable({ user }: { user: User }) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="h-[33svh]">
+        <CardContent className="h-[50svh]">
           {loading ? (
             <Loading />
           ) : (

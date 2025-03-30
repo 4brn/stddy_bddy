@@ -52,13 +52,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useState, useCallback, useEffect, ChangeEvent } from "react";
+import { useState, useCallback, useEffect, type ChangeEvent } from "react";
 import { Ellipsis, Plus, RefreshCw, Save, Star, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
+import { UpdateTestSchema } from "@/lib/validation";
+
+interface TestEditProps {
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+  crud: Crud;
+  test: Test;
+  users: User[];
+  categories: Category[];
+}
 
 export default function TestEdit({
   open,
@@ -67,14 +77,7 @@ export default function TestEdit({
   test,
   users,
   categories,
-}: {
-  open: boolean;
-  onOpenChange: (state: boolean) => void;
-  crud: Crud;
-  test: Test;
-  users: User[];
-  categories: Category[];
-}) {
+}: TestEditProps) {
   const { user } = useAuth()!;
   const [updatedTest, setUpdatedTest] = useState<Test>(test);
   const [alertOpen, setAlertOpen] = useState(false);
@@ -88,6 +91,14 @@ export default function TestEdit({
 
   const handleSave = async () => {
     try {
+      const { success, data, error } = UpdateTestSchema.safeParse(updatedTest);
+
+      if (!success) {
+        toast.error("Validation error");
+        console.error(error);
+        return;
+      }
+
       const response = await fetch(
         `http://localhost:1337/api/tests/${test.id}`,
         {
@@ -96,22 +107,22 @@ export default function TestEdit({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updatedTest),
+          body: JSON.stringify(data),
         },
       );
 
       if (!response.ok) {
-        console.error("Update failed");
+        toast.error("Update failed");
         return;
       }
 
       const updatedData = await response.json();
-      crud.update({ ...updatedTest, ...updatedData });
+      crud.update({ ...data, ...updatedData });
       toast.success(`Updated test (${updatedTest.id})`);
       setAlertOpen(false);
       onOpenChange(false);
     } catch (error) {
-      toast.error("Something happened");
+      toast.error("Something went wrong");
     }
   };
 

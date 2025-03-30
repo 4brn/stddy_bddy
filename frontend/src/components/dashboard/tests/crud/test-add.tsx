@@ -4,6 +4,7 @@ import type {
   Answer,
   UserSelect as User,
   CategorySelect as Category,
+  TestInsert as Test,
 } from "@shared/types";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,6 +59,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
+import Choice from "@/components/choice";
+import { CreateTestSchema } from "@/lib/validation";
 
 export default function TestAdd({
   open,
@@ -73,8 +76,12 @@ export default function TestAdd({
   categories: Category[];
 }) {
   const { user } = useAuth()!;
+  if (!user) return <Choice />;
+
   const [newTest, setNewTest] = useState({
     title: "",
+    category_id: 1,
+    author_id: user?.id,
     is_private: false,
     questions: [] as Question[],
   });
@@ -82,13 +89,19 @@ export default function TestAdd({
 
   const handleSave = async () => {
     try {
+      const { data, success, error } = CreateTestSchema.safeParse(newTest);
+      if (!success) {
+        toast.error(`Validation error`);
+        return;
+      }
+
       const response = await fetch(`http://localhost:1337/api/tests`, {
         credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newTest),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -98,6 +111,7 @@ export default function TestAdd({
 
       crud.add();
       toast.success(`Created new test`);
+      reset();
       setAlertOpen(false);
       onOpenChange(false);
     } catch (error) {
@@ -120,10 +134,11 @@ export default function TestAdd({
   const reset = () => {
     setNewTest({
       title: "",
+      author_id: user.id,
+      category_id: 1,
       is_private: false,
       questions: [] as Question[],
     });
-    toast.info("Reset");
   };
 
   const handlePrivateToggle = useCallback(() => {
@@ -147,7 +162,6 @@ export default function TestAdd({
       ...prev,
       questions: [...prev.questions, newQuestion],
     }));
-    toast.info(`Added question`);
   }, [newTest.questions]);
 
   const handleQuestionUpdate = useCallback(
@@ -333,16 +347,15 @@ export default function TestAdd({
                     value={question.text}
                     className="flex-1"
                   />
-                  <Button
-                    variant="outline"
+                  <div
                     onClick={(e) => {
                       stopPropagation(e);
                       handleQuestionDelete(question.id);
                     }}
-                    size={"icon"}
+                    className="border-2 p-2 rounded-md bg-background hover:bg-accent"
                   >
-                    <Trash color="red" />
-                  </Button>
+                    <Trash size={17} color="red" />
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2 mr-6">
                   {question.answers.map((answer, i) => (

@@ -125,7 +125,7 @@ export async function createTest(req: Request, res: Response) {
         title: testData.title,
         is_private: testData.is_private,
         questions: testData.questions as Question[],
-        category: testData.category,
+        category_id: testData.category_id,
         author_id: testData.author_id,
         created_at: testData.created_at,
         updated_at: testData.updated_at,
