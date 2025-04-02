@@ -11,11 +11,10 @@ import { Button } from "@/components/ui/button";
 import type { UserWithSession, UserCrud } from "@shared/types";
 import { Copy, LogOut, Settings2, Trash, UserPen } from "lucide-react";
 import { toast } from "sonner";
-// import { Edit } from "./edit";
 import { useState } from "react";
 import { UserLogout } from "./crud/user-logout";
 import { UserDelete } from "./crud/user-delete";
-import { Edit } from "./crud/user-edit";
+import { UserEdit } from "./crud/user-edit";
 
 export default function UserMenu({
   user,
@@ -85,7 +84,7 @@ export default function UserMenu({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
       />
-      <Edit
+      <UserEdit
         user={user}
         crud={crud}
         open={editOpen}

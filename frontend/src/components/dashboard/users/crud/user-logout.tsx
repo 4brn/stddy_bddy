@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Crud, UserWithSession } from "@shared/types";
+import type { UserCrud as Crud, UserWithSession } from "@shared/types";
 import { toast } from "sonner";
 
 export function UserLogout({

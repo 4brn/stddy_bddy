@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
 
 export default function Register() {
+  const { setUser } = useAuth()!;
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,12 +32,13 @@ export default function Register() {
 
     switch (response.status) {
       case 201:
+        const newUser = await response.json();
+        setUser(newUser);
+        navigate("/tests");
         toast.success("Registered successfully");
-        setTimeout(() => navigate("/"), 1000);
         break;
       case 307:
-        navigate("/dashboard");
-        toast.info("Already logged in");
+        navigate("/tests");
         break;
       case 400:
         reset();

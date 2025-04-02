@@ -16,7 +16,7 @@ export default function Auth() {
   }, [user]);
 
   return (
-    <div className="flex min-h-svh items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Login</TabsTrigger>

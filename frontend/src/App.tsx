@@ -5,14 +5,17 @@ import { AuthProvider, useAuth } from "@/context/auth-context";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Toaster } from "./components/ui/sonner";
 
+import PageLayout from "@/layouts/page";
+import DashboardLayout from "./layouts/dashboard";
+import OverviewLayout from "./layouts/overview";
+
 import Home from "@/pages/home";
 import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
-import PageLayout from "@/layouts/page";
 import NotFound from "@/pages/404";
 import Tests from "@/pages/tests";
-import DashboardLayout from "./layouts/dashboard";
 import Test from "@/pages/test";
+import Solve from "./pages/solve";
 
 export default function App() {
   return (
@@ -35,8 +38,8 @@ function Routing() {
       });
 
       if (response.ok) {
-        const json = await response.json();
-        setUser(json.data);
+        const user = await response.json();
+        setUser(user);
       } else {
         setUser(null);
       }
@@ -55,9 +58,12 @@ function Routing() {
             <Route path="dashboard" element={<Dashboard />} />
           </Route>
           <Route path="tests" element={<Tests />} />
-          <Route path="test/:id" element={<Test />} />
+          <Route element={<OverviewLayout />}>
+            <Route path="test/:id" element={<Test />} />
+          </Route>
+          <Route path="test/:id/solve?" element={<Solve />} />
+          <Route path="/404" element={<NotFound />} />
         </Route>
-        <Route path="/404" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

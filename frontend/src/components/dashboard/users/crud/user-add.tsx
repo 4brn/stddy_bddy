@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { UserCrud as Crud, UserInsert as User } from "@shared/types";
+import type { UserCrud, UserInsert } from "@shared/types";
 import { User as UserValidation } from "@/lib/validation";
 import {
   Dialog,
@@ -38,16 +38,16 @@ export default function UserAdd({
   onOpenChange,
   open,
 }: {
-  crud: Crud;
+  crud: UserCrud;
   onOpenChange: (state: boolean) => void;
   open: boolean;
 }) {
-  const defaultUser: User = {
+  const defaultUser: UserInsert = {
     username: "",
     password: "",
     role: "user" as const,
   };
-  const [newUser, setNewUser] = useState<User>(defaultUser);
+  const [newUser, setNewUser] = useState<UserInsert>(defaultUser);
   const [alertOpen, setAlertOpen] = useState(false);
 
   const reset = () => setNewUser(defaultUser);
@@ -77,17 +77,17 @@ export default function UserAdd({
 
       if (response.ok) {
         crud.add();
-        toast.success(`User created: ${data.username}`);
         reset();
         setAlertOpen(false);
         onOpenChange(false);
+        toast.success(`User created: ${data.username}`);
       }
     } catch (err) {
       toast.error("An error occurred");
     }
   };
 
-  const handleInputChange = (field: keyof User, value: string) => {
+  const handleInputChange = (field: keyof UserInsert, value: string) => {
     setNewUser((prev) => ({ ...prev, [field]: value }));
   };
 

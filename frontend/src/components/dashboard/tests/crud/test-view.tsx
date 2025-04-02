@@ -1,8 +1,8 @@
 import type {
   Question,
-  TestSelect as Test,
-  UserSelect as User,
-  CategorySelect as Category,
+  Test,
+  User,
+  Category,
 } from "@shared/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -75,7 +75,7 @@ export default function TestView({
   const author =
     users.find((u) => u.id === test.author_id)?.username ?? test.author_id;
   const category =
-    categories.find((c) => c.id === test.category_id)?.category ??
+    categories.find((c) => c.id === test.category_id)?.name ??
     test.category_id;
 
   return (

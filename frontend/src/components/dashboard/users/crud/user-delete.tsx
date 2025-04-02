@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Crud, UserSelect as User } from "@shared/types";
+import type { UserCrud, User } from "@shared/types";
 import { toast } from "sonner";
 
 export function UserDelete({
@@ -18,7 +18,7 @@ export function UserDelete({
   open,
 }: {
   user: User;
-  crud: Crud;
+  crud: UserCrud;
   onOpenChange: (state: boolean) => void;
   open: boolean;
 }) {

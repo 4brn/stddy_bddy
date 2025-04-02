@@ -20,22 +20,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  CategorySelect as Category,
-  TestSelect as Test,
-  UserSelect as User,
-} from "@shared/types";
 import { toast } from "sonner";
 import { LoadingScreen } from "@/components/loading";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "@/context/auth-context";
 import Choice from "@/components/choice";
+import type { Category, TestInfo } from "@shared/types";
+
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+const sorting = {
+  ascending: (x: any, y: any) => (x < y ? 0 : 1),
+  descending: (x: any, y: any) => (x > y ? 0 : 1),
+};
 
 export default function Tests() {
   const { user } = useAuth()!;
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tests, setTests] = useState<{ [index: number]: Test[] }>({});
-  const [users, setUser] = useState<User[]>([]);
+  const [sort, setSort] = useState<keyof typeof sorting>("ascending");
+  const [tests, setTests] = useState<{ [index: number]: TestInfo[] }>({});
+  // const [users, setUser] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -54,7 +62,7 @@ export default function Tests() {
 
   useEffect(() => {
     const fetchTests = async () => {
-      const response = await fetch("http://localhost:1337/api/tests", {
+      const response = await fetch("http://localhost:1337/api/info/tests", {
         credentials: "include",
       });
 
@@ -63,13 +71,13 @@ export default function Tests() {
         return;
       }
 
-      const { data }: { data: Test[] } = await response.json();
-      const categorizedTests: { [category: number]: Test[] } = {};
+      const data: TestInfo[] = await response.json();
+      const categorizedTests: { [category: number]: TestInfo[] } = {};
 
       for (let test of data) {
-        if (!Object.hasOwn(categorizedTests, test.category_id))
-          categorizedTests[test.category_id] = [test];
-        else categorizedTests[test.category_id].push(test);
+        if (!Object.hasOwn(categorizedTests, test.category.id))
+          categorizedTests[test.category.id] = [test];
+        else categorizedTests[test.category.id].push(test);
       }
 
       setTests(categorizedTests);
@@ -104,29 +112,33 @@ export default function Tests() {
               return 0;
             }}
           >
-            <CommandInput placeholder="Type a command or search..." />
+            <CommandInput placeholder="Type a test or a subject..." />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              {categories
-                .sort((c1, c2) => (c1.category < c2.category ? 0 : 1))
-                .map((category, i) => (
-                  <CommandGroup
-                    key={i}
-                    className={!tests[category.id] ? "hidden" : ""}
-                    heading={category.category}
-                  >
-                    {tests[category.id]?.map((test, i) => (
-                      <Link key={i} to={`/test/${test.id}`}>
-                        <CommandItem
-                          value={test.title}
-                          keywords={[category.category, test.id.toString()]}
-                        >
-                          {test.title}
-                        </CommandItem>
-                      </Link>
-                    ))}
-                  </CommandGroup>
-                ))}
+              {categories.sort(sorting[sort]).map((category, i) => (
+                <CommandGroup
+                  key={i}
+                  className={!tests[category.id] ? "hidden" : ""}
+                  heading={category.name}
+                >
+                  {tests[category.id]?.map((test, i) => (
+                    <Link key={i} to={`/test/${test.id}`}>
+                      <CommandItem
+                        value={test.title}
+                        keywords={[
+                          test.category.name,
+                          test.id.toString(),
+                          test.author.username,
+                          test.is_private ? "private" : "public",
+                        ]}
+                        className="p-3"
+                      >
+                        {test.title}
+                      </CommandItem>
+                    </Link>
+                  ))}
+                </CommandGroup>
+              ))}
             </CommandList>
           </Command>
         </div>

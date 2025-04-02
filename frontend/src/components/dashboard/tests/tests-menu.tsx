@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import type {
-  TestSelect as Test,
+  Test,
   TestCrud as Crud,
-  UserSelect as User,
-  CategorySelect as Category,
+  User,
+  Category,
 } from "@shared/types";
 import { BookOpen, Copy, FilePen, Settings2, Trash } from "lucide-react";
 import { toast } from "sonner";

@@ -10,12 +10,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { File, Plus, RefreshCw } from "lucide-react";
-import type {
-  TestSelect as Test,
-  TestCrud as Crud,
-  UserSelect as User,
-  CategorySelect as Category,
-} from "@shared/types";
+import type { Test, TestCrud as Crud, User, Category } from "@shared/types";
 import { Label } from "@/components/ui/label";
 import { Loading } from "@/components/loading";
 import TestMenu from "./tests-menu";
@@ -105,17 +100,16 @@ export default function TestsTable({ user }: { user: User }) {
   const filteredTests = useMemo(() => {
     if (!debouncedSearch) return tests;
 
-    const searchLower = debouncedSearch.toLowerCase();
     return tests.filter((test) => {
-      const visibilityMatch =
-        (test.is_private && "private".includes(searchLower)) ||
-        (!test.is_private && "public".includes(searchLower));
+      const extendedSearchQuery = [
+        test.id,
+        test.title,
+        test.is_private ? "private" : "public",
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      return (
-        test.id.toString().includes(debouncedSearch) ||
-        test.title.toLowerCase().includes(searchLower) ||
-        visibilityMatch
-      );
+      return extendedSearchQuery.includes(debouncedSearch.toLowerCase());
     });
   }, [tests, debouncedSearch]);
 

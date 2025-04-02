@@ -4,9 +4,9 @@ import { Outlet } from "react-router";
 
 export default function PageLayout() {
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen w-screen flex-col">
       <Navbar />
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-8">
         <Outlet />
       </div>
       <Footer />

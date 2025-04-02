@@ -14,7 +14,7 @@ import {
 } from "@/lib/session";
 import { UserValidationSchema } from "@shared/validation";
 import { logger } from "@/utils/logger";
-import type { UserInsert } from "@shared/types";
+import type { UserInsert, UserContext } from "@shared/types";
 
 export async function handleRegister(req: Request, res: Response) {
   const token = getSessionFromCookie(req);
@@ -26,12 +26,11 @@ export async function handleRegister(req: Request, res: Response) {
     }
   }
 
-  const user: UserInsert = { ...req.body, role: "user" };
-  const {
-    success,
-    data: validatedUser,
-    error,
-  } = UserValidationSchema.insert.safeParse(user);
+  const { success, data, error } = UserValidationSchema.insert
+    .omit({ id: true, role: true })
+    .safeParse({
+      ...req.body,
+    });
 
   if (!success) {
     res.status(400).send({
@@ -44,21 +43,19 @@ export async function handleRegister(req: Request, res: Response) {
   const query = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.username, validatedUser.username))
+    .where(eq(usersTable.username, data.username))
     .limit(1);
   if (query.length !== 0) {
     res.status(409).send({ error: "User found" });
     return;
   }
 
-  validatedUser.password = await password.hash(
-    validatedUser.password,
-    "bcrypt",
-  );
+  data.password = await password.hash(data.password, "bcrypt");
 
-  await db
+  const result = await db
     .insert(usersTable)
-    .values(validatedUser)
+    .values(data)
+    .returning()
     .catch((error) => {
       res.status(500).send({
         error: "Internal server error",
@@ -66,9 +63,22 @@ export async function handleRegister(req: Request, res: Response) {
       logger.error(error);
       return;
     });
+  if (!result) {
+    res.status(500).send({
+      error: "Internal server error",
+    });
+    logger.error(error);
+    return;
+  }
 
-  res.status(201).send({ message: "Registered" });
-  logger.info("Registered: ", validatedUser);
+  const newUser = result[0];
+  const newToken = generateToken();
+  const session = await createSession(newToken, newUser.id);
+  setSessionCookie(res, newToken, session.expires_at);
+
+  Reflect.deleteProperty(newUser, "password");
+  res.status(201).send(newUser);
+  logger.info(`Registered ${JSON.stringify(newUser)}`);
   return;
 }
 
@@ -83,11 +93,9 @@ export async function handleLogin(req: Request, res: Response) {
     }
   }
 
-  const {
-    success,
-    data: validatedUser,
-    error,
-  } = UserValidationSchema.insert.partial({ role: true }).safeParse(req.body);
+  const { success, data, error } = UserValidationSchema.insert
+    .omit({ role: true, id: true })
+    .safeParse(req.body);
 
   if (!success) {
     res.status(400).send({ error: "Invalid credentials" });
@@ -98,7 +106,7 @@ export async function handleLogin(req: Request, res: Response) {
   const query = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.username, validatedUser.username));
+    .where(eq(usersTable.username, data.username));
   if (query.length !== 1) {
     res.status(404).send({ error: "User not found" });
     return;
@@ -106,7 +114,7 @@ export async function handleLogin(req: Request, res: Response) {
 
   const user = query[0];
   const passwordsMatch = await Bun.password.verify(
-    validatedUser.password,
+    data.password,
     user.password,
     "bcrypt",
   );
@@ -120,8 +128,9 @@ export async function handleLogin(req: Request, res: Response) {
   const session = await createSession(newToken, user.id);
   setSessionCookie(res, newToken, session.expires_at);
 
+  Reflect.deleteProperty(user, "password");
   res.status(200).send({ data: user });
-  logger.info(`Logged in: `, user.id, user.username, user.role);
+  logger.info(`Logged in as ${user.username}`);
   return;
 }
 
@@ -154,6 +163,7 @@ export async function handleMe(req: Request, res: Response) {
     return;
   }
 
-  res.status(200).send({ data: user });
+  Reflect.deleteProperty(user, "password");
+  res.status(200).send(user);
   return;
 }

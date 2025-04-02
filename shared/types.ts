@@ -6,19 +6,19 @@ import {
   categoriesTable,
 } from "../backend/src/db";
 
-export type UserSelect = typeof usersTable.$inferSelect;
+export type User = typeof usersTable.$inferSelect;
 export type UserInsert = typeof usersTable.$inferInsert;
 
-export type SessionSelect = typeof sessionsTable.$inferSelect;
+export type Session = typeof sessionsTable.$inferSelect;
 export type SessionInsert = typeof sessionsTable.$inferInsert;
 
-export type CategorySelect = typeof categoriesTable.$inferSelect;
+export type Category = typeof categoriesTable.$inferSelect;
 export type CategoryInsert = typeof categoriesTable.$inferInsert;
 
-export type TestSelect = typeof testsTable.$inferSelect;
+export type Test = typeof testsTable.$inferSelect;
 export type TestInsert = typeof testsTable.$inferInsert;
 
-export type LikeSelect = typeof likesTable.$inferSelect;
+export type Like = typeof likesTable.$inferSelect;
 export type LikeInsert = typeof likesTable.$inferInsert;
 
 export type Question = {
@@ -33,19 +33,28 @@ export type Answer = {
   value: string | number;
 };
 
-export type UserWithSession = UserSelect & {
-  active: boolean;
+export type UserContext = Omit<User, "password">;
+
+export type Author = Omit<User, "password" | "role">;
+
+export type QuestionWithoutCorrectAnswer = Omit<Question, "correctId">;
+
+export type UserWithSession = User & { active: boolean };
+
+export type TestInfo = Omit<Test, "author_id" | "category_id" | "questions"> & {
+  category: Category;
+  author: Author;
 };
 
 export type UserCrud = {
   add: () => void;
-  update: (newUser: UserSelect) => void;
-  delete: (user: UserSelect) => void;
+  update: (newUser: User) => void;
+  delete: (user: User) => void;
   logout: (user: UserWithSession) => void;
 };
 
 export type TestCrud = {
   add: () => void;
-  update: (newTest: TestSelect) => void;
-  delete: (test: TestSelect) => void;
+  update: (newTest: Test) => void;
+  delete: (test: Test) => void;
 };

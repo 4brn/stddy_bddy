@@ -10,11 +10,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import type {
-  UserSelect as User,
-  UserCrud as Crud,
-  UserWithSession,
-} from "@shared/types";
+import type { User, UserCrud as Crud, UserWithSession } from "@shared/types";
 import { Plus, RefreshCw, User as UserIcon } from "lucide-react";
 import UserMenu from "./user-menu";
 import { Loading } from "@/components/loading";
@@ -27,17 +23,16 @@ export default function UsersTable() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
 
-  // Handle search input with debouncing
   useEffect(() => {
     const timerId = setTimeout(() => {
       setDebouncedSearch(searchInput);
-    }, 50);
+    }, 30);
 
     return () => clearTimeout(timerId);
   }, [searchInput]);
 
   const fetchUsers = useCallback(async () => {
-    const timer = setTimeout(() => setLoading(false), 300);
+    const timer = setTimeout(() => setLoading(false), 250);
     try {
       const response = await fetch(
         "http://localhost:1337/api/users/with/sessions",
@@ -84,13 +79,16 @@ export default function UsersTable() {
   const filteredUsers = useMemo(() => {
     if (!debouncedSearch) return users;
 
-    const searchLower = debouncedSearch.toLowerCase();
     return users.filter((user) => {
-      return (
-        user.id.toString().includes(searchLower) ||
-        user.username.includes(searchLower) ||
-        user.role.includes(searchLower)
-      );
+      const extendedQueryString = [
+        user.id,
+        user.username,
+        user.active ? "true" : "false",
+        user.role,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return extendedQueryString.includes(debouncedSearch.toLowerCase());
     });
   }, [users, debouncedSearch]);
 
@@ -139,7 +137,7 @@ export default function UsersTable() {
                     <span className="truncate">{user.username}</span>
                     <span className="hidden md:block">{user.role}</span>
                     <span className="hidden sm:block">
-                      {user.active ? "Active" : "Inactive"}
+                      {user.active ? "True" : "False"}
                     </span>
                     <span className="justify-self-center sm:justify-self-start">
                       <UserMenu user={user} crud={crud} />

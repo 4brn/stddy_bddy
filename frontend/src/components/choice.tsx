@@ -6,14 +6,14 @@ export default function Choice() {
     <div className="min-h-svh col-span-2 flex flex-col gap-6 justify-center items-center">
       <h1 className="text-4xl">The choice is yours</h1>
       <div className="grid grid-cols-2">
-        <Link to={"/auth"}>
+        <Link to={"/"}>
           <Button className="text-2xl" variant={"link"}>
-            Login
+            Home
           </Button>
         </Link>
         <Link to={"/auth"}>
           <Button className="text-2xl" variant={"link"}>
-            Register
+            Auth
           </Button>
         </Link>
       </div>

@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function Home() {
   const { user } = useAuth()!;
+  const navigate = useNavigate();
   return (
     <div className="flex min-h-svh items-center justify-center p-6 md:p-10">
       <div className="flex flex-col items-center justify-center gap-5">
@@ -13,11 +14,13 @@ export default function Home() {
         <p className="text-xl text-center text-accent-foreground">
           Become an academic weapon
         </p>
-        <Link to={user ? "/tests" : "/auth"}>
-          <Button size={"lg"} className="text-xl p-6">
-            Learn
-          </Button>
-        </Link>
+        <Button
+          size={"lg"}
+          className="text-xl p-6"
+          onClick={() => navigate(user ? "/tests" : "/auth")}
+        >
+          Learn
+        </Button>
       </div>
     </div>
   );

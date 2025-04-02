@@ -42,7 +42,7 @@ export const testsTable = sqliteTable("tests", {
 
 export const categoriesTable = sqliteTable("categories", {
   id: int().primaryKey({ autoIncrement: true }).notNull(),
-  category: text().notNull(),
+  name: text().notNull(),
 });
 
 export const likesTable = sqliteTable("likes", {

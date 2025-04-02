@@ -37,8 +37,7 @@ export default function Login() {
         toast.success("Logged in successfully");
         break;
       case 307:
-        navigate("/dashboard");
-        toast.info("Already logged in");
+        navigate("/tests");
         break;
       case 400:
         reset();

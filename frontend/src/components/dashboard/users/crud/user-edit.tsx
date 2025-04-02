@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { UserSelect as User, UserCrud as Crud } from "@shared/types";
+import type { User, UserCrud as Crud } from "@shared/types";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { User as UserSchema } from "@/lib/validation";
 
-export function Edit({
+export function UserEdit({
   user,
   crud,
   onOpenChange,
@@ -58,7 +58,7 @@ export function Edit({
         return;
       }
       const response = await fetch(
-        `http://localhost:1337/api/users/${newUser.id}`,
+        `http://localhost:1337/api/users/${user.id}`,
         {
           method: "PATCH",
           credentials: "include",

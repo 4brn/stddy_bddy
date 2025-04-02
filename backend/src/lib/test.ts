@@ -1,6 +1,6 @@
 // stddy_bddy/backend/src/services/test.ts
 import { type Request, type Response } from "express";
-import { db, testsTable, likesTable, usersTable } from "@/db";
+import { db, testsTable, likesTable, usersTable, categoriesTable } from "@/db";
 import { and, eq, sql } from "drizzle-orm";
 import { TestValidationSchema } from "@shared/validation";
 import { logger } from "@/utils/logger";
@@ -9,7 +9,7 @@ import {
   setSessionCookie,
   validateSession,
 } from "@/lib/session";
-import type { Question, TestInsert, TestSelect } from "@shared/types";
+import type { Question, TestInfo, TestInsert, Test } from "@shared/types";
 
 // Get all tests (with privacy filter based on user role)
 export async function getTests(req: Request, res: Response) {
@@ -39,6 +39,53 @@ export async function getTests(req: Request, res: Response) {
   return;
 }
 
+// test info without questions and answers
+export async function getTestsInfo(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+  if (!token) {
+    res.status(307).send({ error: "No active session found" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+  setSessionCookie(res, token, session.expires_at);
+
+  let tests = await db
+    .select({
+      id: testsTable.id,
+      title: testsTable.title,
+      is_private: testsTable.is_private,
+      created_at: testsTable.created_at,
+      updated_at: testsTable.updated_at,
+      author: {
+        id: usersTable.id,
+        username: usersTable.username,
+      },
+      category: {
+        id: categoriesTable.id,
+        name: categoriesTable.name,
+      },
+    })
+    .from(testsTable)
+    .leftJoin(usersTable, eq(testsTable.author_id, usersTable.id))
+    .leftJoin(categoriesTable, eq(testsTable.category_id, categoriesTable.id))
+    .leftJoin(likesTable, eq(testsTable.id, likesTable.test_id));
+
+  // Filter private tests for non-admin users
+  if (user.role === "user") {
+    tests = tests.filter(
+      (test) => !test.is_private || test?.author?.id === user.id,
+    );
+  }
+
+  res.status(200).send(tests);
+  return;
+}
+
 // Get a specific test by ID
 export async function getTestById(req: Request, res: Response) {
   const token = getSessionFromCookie(req);
@@ -60,28 +107,106 @@ export async function getTestById(req: Request, res: Response) {
   }
   setSessionCookie(res, token, session.expires_at);
 
-  const test = await db
-    .select()
+  const result = await db
+    .select({
+      id: testsTable.id,
+      title: testsTable.title,
+      is_private: testsTable.is_private,
+      created_at: testsTable.created_at,
+      updated_at: testsTable.updated_at,
+      questions: testsTable.questions,
+      author: {
+        id: usersTable.id,
+        username: usersTable.username,
+      },
+      category: {
+        id: categoriesTable.id,
+        name: categoriesTable.name,
+      },
+    })
     .from(testsTable)
+    .leftJoin(usersTable, eq(usersTable.id, testsTable.author_id))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, testsTable.category_id))
     .where(eq(testsTable.id, testId))
     .limit(1);
 
-  if (test.length === 0) {
+  if (result.length === 0) {
     res.status(404).send({ error: "Test not found" });
     return;
   }
 
   // Check if user can access this test
   if (
-    test[0].is_private &&
+    result[0].is_private &&
     user.role !== "admin" &&
-    test[0].author_id !== user.id
+    result[0]?.author?.id !== user.id
   ) {
     res.status(403).send({ error: "Unauthorized" });
     return;
   }
 
-  res.status(200).send({ data: test[0] });
+  res.status(200).send({ data: result[0] });
+  return;
+}
+
+export async function getTestInfoById(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+  const testId = Number(req.params.id);
+  if (isNaN(testId)) {
+    res.status(400).send({ error: "Invalid id" });
+    return;
+  }
+
+  if (!token) {
+    res.status(307).send({ error: "Session expired" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+  setSessionCookie(res, token, session.expires_at);
+
+  const result = await db
+    .select({
+      id: testsTable.id,
+      title: testsTable.title,
+      is_private: testsTable.is_private,
+      created_at: testsTable.created_at,
+      updated_at: testsTable.updated_at,
+      author: {
+        id: usersTable.id,
+        username: usersTable.username,
+      },
+      category: {
+        id: categoriesTable.id,
+        name: categoriesTable.name,
+      },
+    })
+    .from(testsTable)
+    .leftJoin(usersTable, eq(usersTable.id, testsTable.author_id))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, testsTable.category_id))
+    .where(eq(testsTable.id, testId))
+    .limit(1);
+
+  if (result.length === 0) {
+    res.status(404).send({ error: "Test not found" });
+    return;
+  }
+
+  // Check if user can access this test
+  if (
+    result[0].is_private &&
+    user.role !== "admin" &&
+    result[0]?.author?.id !== user.id
+  ) {
+    res.status(403).send({ error: "Unauthorized" });
+    return;
+  }
+
+  res.status(200).send({ data: result[0] });
   return;
 }
 
@@ -168,6 +293,46 @@ export async function getMyTests(req: Request, res: Response) {
   return;
 }
 
+export async function getMyTestsInfo(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+
+  if (!token) {
+    res.status(307).send({ error: "Session expired" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+  setSessionCookie(res, token, session.expires_at);
+
+  const tests = await db
+    .select({
+      id: testsTable.id,
+      title: testsTable.title,
+      is_private: testsTable.is_private,
+      created_at: testsTable.created_at,
+      updated_at: testsTable.updated_at,
+      author: {
+        id: usersTable.id,
+        username: usersTable.username,
+      },
+      category: {
+        id: categoriesTable.id,
+        name: categoriesTable.name,
+      },
+    })
+    .from(testsTable)
+    .leftJoin(usersTable, eq(usersTable.id, testsTable.author_id))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, testsTable.category_id))
+    .where(eq(testsTable.author_id, user.id));
+
+  res.status(200).send({ data: tests });
+  return;
+}
+
 // Update an existing test
 export async function updateTest(req: Request, res: Response) {
   const token = getSessionFromCookie(req);
@@ -221,7 +386,7 @@ export async function updateTest(req: Request, res: Response) {
   }
 
   // Prepare update data, preserving ownerId and createdAt
-  const updateData: TestSelect = {
+  const updateData: Test = {
     id: data.id,
     title: data.title,
     is_private: data.is_private,
