@@ -1,147 +1,149 @@
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  // CommandShortcut,
 } from "@/components/ui/command";
 import { useEffect, useState } from "react";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
-import { LoadingScreen } from "@/components/loading";
-import { Link, useNavigate } from "react-router";
-import { useAuth } from "@/context/auth-context";
-import Choice from "@/components/choice";
+import { Link } from "react-router";
 import type { Category, TestInfo } from "@shared/types";
-
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-
-const sorting = {
-  ascending: (x: any, y: any) => (x < y ? 0 : 1),
-  descending: (x: any, y: any) => (x > y ? 0 : 1),
-};
+import { ArrowDownAZ, ArrowDownZA } from "lucide-react";
 
 export default function Tests() {
-  const { user } = useAuth()!;
   const [categories, setCategories] = useState<Category[]>([]);
-  const [sort, setSort] = useState<keyof typeof sorting>("ascending");
-  const [tests, setTests] = useState<{ [index: number]: TestInfo[] }>({});
-  // const [users, setUser] = useState<User[]>([]);
+  const [reversedCategories, setReversedCategories] = useState(false);
+  const [reversedTests, setReversedTests] = useState(false);
+  const [tests, setTests] = useState<Record<number, TestInfo[]>>({});
+
+  function sortCategories(reversed: boolean) {
+    const cats = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+    return reversed ? cats.toReversed() : cats;
+  }
+
+  function sortTests(categoryId: number, reversed: boolean) {
+    const testList = tests[categoryId];
+    if (!testList) return [];
+
+    const sortedTests = [...testList].sort((a, b) =>
+      a.title.localeCompare(b.title),
+    );
+    return reversed ? sortedTests.toReversed() : sortedTests;
+  }
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await fetch("http://localhost:1337/api/categories", {
-        credentials: "include",
-      });
+      try {
+        const response = await fetch("http://localhost:1337/api/categories", {
+          credentials: "include",
+        });
 
-      if (response.ok) {
-        const json = await response.json();
-        setCategories(json.data);
+        if (response.ok) {
+          const json = await response.json();
+          setCategories(json.data);
+        }
+      } catch (error) {
+        toast.error("Error fetching categories");
+      }
+    };
+    const fetchTests = async () => {
+      try {
+        const response = await fetch("http://localhost:1337/api/info/tests", {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          toast.error("Error while fetching tests");
+          return;
+        }
+
+        const data: TestInfo[] = await response.json();
+        const categorizedTests: Record<number, TestInfo[]> = {};
+
+        for (const test of data) {
+          const categoryId = test.category.id;
+          if (!categorizedTests[categoryId]) {
+            categorizedTests[categoryId] = [];
+          }
+          categorizedTests[categoryId].push(test);
+        }
+
+        setTests(categorizedTests);
+      } catch (error) {
+        toast.error("Error fetching tests");
       }
     };
 
     fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const fetchTests = async () => {
-      const response = await fetch("http://localhost:1337/api/info/tests", {
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        toast.error("Error while fetching tests");
-        return;
-      }
-
-      const data: TestInfo[] = await response.json();
-      const categorizedTests: { [category: number]: TestInfo[] } = {};
-
-      for (let test of data) {
-        if (!Object.hasOwn(categorizedTests, test.category.id))
-          categorizedTests[test.category.id] = [test];
-        else categorizedTests[test.category.id].push(test);
-      }
-
-      setTests(categorizedTests);
-    };
-
     fetchTests();
   }, []);
 
   return (
-    <div className="w-full flex justify-center">
-      <div className="h-[50svh] grid gap-2 grid-cols-3 sm:w-[60vw]">
-        <Card className="bg-background rounded-md">
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-            <CardDescription>Filter tests</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Card Content</p>
-          </CardContent>
-          <CardFooter>
-            <p>Card Footer</p>
-          </CardFooter>
-        </Card>
-        <div className="col-span-2">
-          <Command
-            loop
-            className="bg-background border"
-            filter={(value, search, keywords) => {
-              const extendValue = value + " " + keywords?.join(" ");
-              if (extendValue.toLowerCase().includes(search.toLowerCase()))
-                return 1;
-              return 0;
-            }}
-          >
-            <CommandInput placeholder="Type a test or a subject..." />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              {categories.sort(sorting[sort]).map((category, i) => (
-                <CommandGroup
-                  key={i}
-                  className={!tests[category.id] ? "hidden" : ""}
-                  heading={category.name}
-                >
-                  {tests[category.id]?.map((test, i) => (
-                    <Link key={i} to={`/test/${test.id}`}>
-                      <CommandItem
-                        value={test.title}
-                        keywords={[
-                          test.category.name,
-                          test.id.toString(),
-                          test.author.username,
-                          test.is_private ? "private" : "public",
-                        ]}
-                        className="p-3"
-                      >
-                        {test.title}
-                      </CommandItem>
-                    </Link>
-                  ))}
-                </CommandGroup>
-              ))}
-            </CommandList>
-          </Command>
-        </div>
+    <div className="w-full h-full flex justify-center items-center">
+      <div className="w-[80vw] h-[40vh]">
+        <Command
+          loop
+          className="bg-background"
+          filter={(value, search, keywords) => {
+            const extendValue = value + " " + keywords?.join(" ");
+            return extendValue.toLowerCase().includes(search.toLowerCase())
+              ? 1
+              : 0;
+          }}
+        >
+          <CommandInput
+            className="flex-1"
+            placeholder="Type a test or a subject..."
+          />
+          <div className="grid sm:grid-cols-2 gap-1">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setReversedCategories(!reversedCategories)}
+            >
+              {reversedCategories ? <ArrowDownZA /> : <ArrowDownAZ />}
+              Category ({reversedCategories ? "reversed" : "alphabetical"})
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setReversedTests(!reversedTests)}
+            >
+              {reversedTests ? <ArrowDownZA /> : <ArrowDownAZ />}
+              Tests ({reversedTests ? "reversed" : "alphabetical"})
+            </Button>
+          </div>
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            {sortCategories(reversedCategories).map((category, i) => (
+              <CommandGroup
+                key={category.id}
+                className={!tests[category.id] ? "hidden" : ""}
+                heading={category.name}
+              >
+                {sortTests(category.id, reversedTests).map((test) => (
+                  <Link key={test.id} to={`/test/${test.id}`}>
+                    <CommandItem
+                      value={test.title}
+                      keywords={[
+                        test.category.name,
+                        test.id.toString(),
+                        test.author.username,
+                        test.is_private ? "private" : "public",
+                      ]}
+                      className="p-3"
+                    >
+                      {test.title}
+                    </CommandItem>
+                  </Link>
+                ))}
+              </CommandGroup>
+            ))}
+          </CommandList>
+        </Command>
       </div>
     </div>
   );
