@@ -83,7 +83,7 @@ export default function Tests() {
 
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <div className="w-[80vw] h-[40vh]">
+      <div className="w-[80vw] h-[40vh] sm:w-[50vw]">
         <Command
           loop
           className="bg-background"

@@ -247,7 +247,9 @@ export async function getIsTestLikedByUser(req: Request, res: Response) {
     const like = await db
       .select()
       .from(likesTable)
-      .where(eq(likesTable.user_id, user.id));
+      .where(
+        and(eq(likesTable.user_id, user.id), eq(likesTable.test_id, testId)),
+      );
 
     res.status(200).send(like.length > 0 ? true : false);
     return;
