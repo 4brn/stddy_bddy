@@ -206,3 +206,56 @@ export async function getLikes(req: Request, res: Response) {
     return;
   }
 }
+
+export async function getIsTestLikedByUser(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+  const testId = Number(req.params.id);
+
+  if (isNaN(testId)) {
+    res.status(400).send({ error: "Invalid test id" });
+    return;
+  }
+
+  if (!token) {
+    res.status(307).send({ error: "Session expired" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+
+  setSessionCookie(res, token, session.expires_at);
+
+  // Verify the test exists
+  const existingTest = await db
+    .select()
+    .from(testsTable)
+    .where(eq(testsTable.id, testId))
+    .limit(1);
+
+  if (existingTest.length === 0) {
+    res.status(404).send({ error: "Test not found" });
+    return;
+  }
+
+  try {
+    // Count likes for this test
+    const like = await db
+      .select()
+      .from(likesTable)
+      .where(eq(likesTable.user_id, user.id));
+
+    res.status(200).send(like.length > 0 ? true : false);
+    return;
+  } catch (dbError) {
+    logger.error(dbError);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+    return;
+  }
+}

@@ -134,7 +134,6 @@ export default function Tests() {
                         test.author.username,
                         test.is_private ? "private" : "public",
                       ]}
-                      className="p-3"
                     >
                       {test.title}
                     </CommandItem>

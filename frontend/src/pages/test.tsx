@@ -10,6 +10,8 @@ import {
   CalendarPlus,
   CalendarSync,
   Eye,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +29,23 @@ export default function Test() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [test, setTest] = useState<TestInfo | null>(null);
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  async function handleLike() {
+    const endpoint = liked ? "dislike" : "like";
+    const response = await fetch(
+      `http://localhost:1337/api/tests/${id}/${endpoint}`,
+      {
+        method: "POST",
+        credentials: "include",
+      },
+    );
+
+    if (response.ok) {
+      setLiked(!liked);
+    }
+  }
 
   useEffect(() => {
     const fetchTest = async () => {
@@ -54,7 +72,26 @@ export default function Test() {
       }
     };
 
+    const fetchLike = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:1337/api/tests/${id}/liked`,
+          {
+            credentials: "include",
+          },
+        );
+
+        if (response.ok) {
+          const liked: boolean = await response.json();
+          setLiked(liked);
+        }
+      } catch (error) {
+        toast.error("Something happened");
+      }
+    };
+
     fetchTest();
+    fetchLike();
   }, []);
 
   const created = new Date(test?.created_at ?? "").toLocaleDateString();
@@ -64,10 +101,10 @@ export default function Test() {
     <LoadingScreen />
   ) : (
     <div className="flex flex-col items-start justify-center gap-10">
-      <div className="text-2xl self-start flex w-full font-bold gap-5 sm:3xl">
+      <div className="text-2xl self-start font-bold gap-5 sm:3xl">
         <h1 className="truncate">{test?.title}</h1>
       </div>
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col justify-center gap-3">
         <Info>
           <Left>
             <User />
@@ -100,9 +137,19 @@ export default function Test() {
           <span>{updated}</span>
         </Info>
       </ul>
-      <Button size={"lg"} className="text-lg w-full py-5">
-        Begin
-      </Button>
+      <div className="flex w-full gap-1">
+        <Button size={"lg"} className="text-lg flex-1 py-5">
+          Begin
+        </Button>
+        <Button
+          size={"lg"}
+          variant={liked ? "destructive" : "secondary"}
+          className={`text-lg py-5`}
+          onClick={handleLike}
+        >
+          {liked ? <ThumbsDown /> : <ThumbsUp />}
+        </Button>
+      </div>
     </div>
   );
 }
