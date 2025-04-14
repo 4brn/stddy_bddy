@@ -1,16 +1,13 @@
 import { Router } from "express";
-import {
-  handleRegister,
-  handleLogin,
-  handleLogout,
-  handleMe,
-} from "@/lib/auth";
+import * as auth from "@/lib/auth";
 
 const router = Router();
 
-router.post("/auth/register", handleRegister);
-router.post("/auth/login", handleLogin);
-router.delete("/auth/logout", handleLogout);
-router.get("/auth/me", handleMe);
+router.get("/auth/me", auth.handleMe);
+
+router.post("/auth/register", auth.handleRegister);
+router.post("/auth/login", auth.handleLogin);
+
+router.delete("/auth/logout", auth.handleLogout);
 
 export default router;

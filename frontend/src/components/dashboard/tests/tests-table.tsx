@@ -10,13 +10,19 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { File, Plus, RefreshCw } from "lucide-react";
-import type { Test, TestCrud as Crud, User, Category } from "@shared/types";
+import type {
+  Test,
+  TestCrud as Crud,
+  User,
+  Category,
+  UserContext,
+} from "@shared/types";
 import { Label } from "@/components/ui/label";
 import { Loading } from "@/components/loading";
 import TestMenu from "./tests-menu";
 import TestAdd from "./crud/test-add";
 
-export default function TestsTable({ user }: { user: User }) {
+export default function TestsTable({ user }: { user: UserContext }) {
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Test[]>([]);
   const [searchInput, setSearchInput] = useState("");

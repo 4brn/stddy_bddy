@@ -9,7 +9,13 @@ import {
   setSessionCookie,
   validateSession,
 } from "@/lib/session";
-import type { Question, TestInfo, TestInsert, Test } from "@shared/types";
+import type {
+  Question,
+  TestInfo,
+  TestInsert,
+  Test,
+  TestSolve,
+} from "@shared/types";
 
 // Get all tests (with privacy filter based on user role)
 export async function getTests(req: Request, res: Response) {
@@ -146,6 +152,77 @@ export async function getTestById(req: Request, res: Response) {
   }
 
   res.status(200).send({ data: result[0] });
+  return;
+}
+
+// Get a specific test by ID
+export async function getTestForSolvingById(req: Request, res: Response) {
+  const token = getSessionFromCookie(req);
+  const testId = Number(req.params.id);
+  if (isNaN(testId)) {
+    res.status(400).send({ error: "Invalid id" });
+    return;
+  }
+
+  if (!token) {
+    res.status(307).send({ error: "Session expired" });
+    return;
+  }
+
+  const { user, session } = await validateSession(token);
+  if (!session) {
+    res.status(401).send({ error: "Unauthorized" });
+    return;
+  }
+  setSessionCookie(res, token, session.expires_at);
+
+  const result = await db
+    .select({
+      id: testsTable.id,
+      title: testsTable.title,
+      is_private: testsTable.is_private,
+      created_at: testsTable.created_at,
+      updated_at: testsTable.updated_at,
+      questions: testsTable.questions,
+      author: {
+        id: usersTable.id,
+        username: usersTable.username,
+      },
+      category: {
+        id: categoriesTable.id,
+        name: categoriesTable.name,
+      },
+    })
+    .from(testsTable)
+    .leftJoin(usersTable, eq(usersTable.id, testsTable.author_id))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, testsTable.category_id))
+    .where(eq(testsTable.id, testId))
+    .limit(1);
+
+  if (result.length === 0) {
+    res.status(404).send({ error: "Test not found" });
+    return;
+  }
+
+  // Check if user can access this test
+  const test = result[0];
+  if (
+    test.is_private &&
+    user.role !== "admin" &&
+    test?.author?.id !== user.id
+  ) {
+    res.status(403).send({ error: "Unauthorized" });
+    return;
+  }
+
+  const nulledTest: TestSolve = {
+    ...test,
+    questions: test?.questions.map((q) => {
+      return { ...q, correctId: null };
+    }),
+  };
+
+  res.status(200).send({ data: nulledTest });
   return;
 }
 

@@ -2,8 +2,8 @@ import type {
   Question,
   TestCrud as Crud,
   Answer,
-  UserSelect as User,
-  CategorySelect as Category,
+  User,
+  Category,
   TestInsert as Test,
 } from "@shared/types";
 
@@ -322,9 +322,9 @@ export default function TestAdd({
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent className="h-[200px]">
-                  {categories.map((c) => (
+                  {categories.toSorted().map((c: Category) => (
                     <SelectItem key={c.id} value={c.id.toString()}>
-                      {c.category}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

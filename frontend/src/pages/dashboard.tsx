@@ -1,16 +1,23 @@
 import { useAuth } from "@/context/auth-context";
-import Choice from "@/components/choice";
 import UsersTable from "@/components/dashboard/users/users-table";
 import TestsTable from "@/components/dashboard/tests/tests-table";
+import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user } = useAuth()!;
+  const navigate = useNavigate();
 
-  if (!user) return <Choice />;
-  return (
+  useEffect(() => {
+    if (!user) navigate("/");
+  }, []);
+
+  return user ? (
     <>
       {user.role === "admin" && <UsersTable />}
-      <TestsTable user={user} />
+      <TestsTable user={user!} />
     </>
+  ) : (
+    <h1>asdfadsf</h1>
   );
 }

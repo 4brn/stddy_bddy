@@ -127,15 +127,15 @@ export default function TestEdit({
   };
 
   const handleCategoryChange = useCallback((categoryId: number) => {
-    setUpdatedTest((prev) => ({ ...prev, category_id: categoryId }));
+    setUpdatedTest((prev: any) => ({ ...prev, category_id: categoryId }));
   }, []);
 
   const handleAuthorChange = useCallback((authorId: number) => {
-    setUpdatedTest((prev) => ({ ...prev, author_id: authorId }));
+    setUpdatedTest((prev: any) => ({ ...prev, author_id: authorId }));
   }, []);
 
   const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setUpdatedTest((prev) => ({ ...prev, title: e.target.value }));
+    setUpdatedTest((prev: any) => ({ ...prev, title: e.target.value }));
   }, []);
 
   const reset = () => {
@@ -144,12 +144,13 @@ export default function TestEdit({
   };
 
   const handlePrivateToggle = useCallback(() => {
-    setUpdatedTest((prev) => ({ ...prev, is_private: !prev.is_private }));
+    setUpdatedTest((prev: any) => ({ ...prev, is_private: !prev.is_private }));
   }, []);
 
   const handleQuestionAdd = useCallback(() => {
     const maxId = updatedTest.questions.reduce(
-      (max, q) => (typeof q.id === "number" && q.id > max ? q.id : max),
+      (max: number, q: number) =>
+        typeof q.id === "number" && q.id > max ? q.id : max,
       0,
     );
 
@@ -160,7 +161,7 @@ export default function TestEdit({
       correctId: null,
     };
 
-    setUpdatedTest((prev) => ({
+    setUpdatedTest((prev: any) => ({
       ...prev,
       questions: [...prev.questions, newQuestion],
     }));
@@ -168,9 +169,9 @@ export default function TestEdit({
 
   const handleQuestionUpdate = useCallback(
     (questionId: number, text: string) => {
-      setUpdatedTest((prev) => ({
+      setUpdatedTest((prev: any) => ({
         ...prev,
-        questions: prev.questions.map((q) =>
+        questions: prev.questions.map((q: any) =>
           q.id === questionId ? { ...q, text } : q,
         ),
       }));
@@ -326,7 +327,7 @@ export default function TestEdit({
                 <SelectContent className="h-[200px]">
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id.toString()}>
-                      {c.category}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

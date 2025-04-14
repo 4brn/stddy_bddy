@@ -5,6 +5,7 @@ import {
   testsTable,
   likesTable,
 } from "../backend/src/db";
+import { z } from "zod";
 
 const { createInsertSchema, createUpdateSchema, createSelectSchema } =
   schemaFactory({
@@ -37,3 +38,8 @@ export const LikeValidationSchema = {
   insert: createInsertSchema(likesTable),
   update: createUpdateSchema(likesTable),
 };
+
+export const resultValidationSchema = z.object({
+  testId: z.coerce.number(),
+  answers: z.record(z.coerce.number(), z.coerce.number()),
+});

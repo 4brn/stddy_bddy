@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 export default function Home() {
   const { user } = useAuth()!;

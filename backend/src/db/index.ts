@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/libsql";
 
 import { createSchemaFactory } from "drizzle-zod";
-import { sqliteTable, int, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, int, text, real } from "drizzle-orm/sqlite-core";
 
 import type { Question } from "@shared/types";
 
@@ -53,6 +53,18 @@ export const likesTable = sqliteTable("likes", {
   user_id: int("user_id")
     .references(() => usersTable.id)
     .notNull(),
+});
+
+export const resultsTable = sqliteTable("results", {
+  id: int().primaryKey({ autoIncrement: true }),
+  test_id: int("test_id")
+    .references(() => testsTable.id)
+    .notNull(),
+  user_id: int("user_id")
+    .references(() => usersTable.id)
+    .notNull(),
+  percentage: real().notNull(),
+  solved_at: int("solved_at", { mode: "timestamp" }).notNull(),
 });
 
 export const schemaFactory = createSchemaFactory;

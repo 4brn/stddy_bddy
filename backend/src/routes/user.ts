@@ -9,6 +9,6 @@ router.get("/users/with/sessions", user.getUsersWithSessions);
 router.post("/users", user.createUser);
 router.patch("/users/:id", user.updateUser);
 router.delete("/users/:id", user.deleteUser);
-router.delete("/users/logout/:id", user.logoutUser);
+router.delete("/users/:id/logout", user.logoutUser);
 
 export default router;

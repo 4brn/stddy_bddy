@@ -1,5 +1,12 @@
 import { type Request, type Response } from "express";
-import { db, likesTable, sessionsTable, testsTable, usersTable } from "@/db";
+import {
+  db,
+  likesTable,
+  resultsTable,
+  sessionsTable,
+  testsTable,
+  usersTable,
+} from "@/db";
 import { eq, sql } from "drizzle-orm";
 import { UserValidationSchema } from "@shared/validation";
 import type { UserInsert } from "@shared/types";
@@ -216,8 +223,8 @@ export async function deleteUser(req: Request, res: Response) {
     return;
   }
 
-  const { user, session } = await validateSession(token);
-  if (!session || user.role !== "admin") {
+  const { user: admin, session } = await validateSession(token);
+  if (!session || admin.role !== "admin") {
     res.status(401).send({ message: "Unauthorized" });
     return;
   }
@@ -230,18 +237,15 @@ export async function deleteUser(req: Request, res: Response) {
   }
 
   try {
-    const deletedUser = (
-      await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.username, "deleted_user"))
-    )[0];
-
     await db
       .update(testsTable)
-      .set({ author_id: deletedUser.id })
+      .set({ author_id: admin.id })
       .where(eq(testsTable.author_id, id));
     await db.delete(sessionsTable).where(eq(sessionsTable.user_id, id));
+    await db.delete(likesTable).where(eq(likesTable.user_id, id));
+    await db.delete(resultsTable).where(eq(resultsTable.user_id, id));
+
+    // Delete user finally to avoid foreign key constraits
     await db.delete(usersTable).where(eq(usersTable.id, id));
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });

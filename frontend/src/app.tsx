@@ -1,8 +1,10 @@
 import "@/index.css";
+import { useAuth } from "@/context/auth-context";
 import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
+
 import { ThemeProvider } from "@/context/theme-context";
-import { AuthProvider, useAuth } from "@/context/auth-context";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "./components/ui/sonner";
 
 import PageLayout from "@/layouts/page";
@@ -21,15 +23,18 @@ export default function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="theme">
       <AuthProvider>
-        <Routing />
+        <BrowserRouter>
+          <Router />
+        </BrowserRouter>
         <Toaster richColors={true} expand={false} />
       </AuthProvider>
     </ThemeProvider>
   );
 }
 
-function Routing() {
+function Router() {
   const { setUser } = useAuth()!;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -42,6 +47,7 @@ function Routing() {
         setUser(user);
       } else {
         setUser(null);
+        navigate("/");
       }
     };
 
@@ -49,22 +55,20 @@ function Routing() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<PageLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="auth" element={<Auth />} />
-          <Route element={<DashboardLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-          </Route>
-          <Route path="tests" element={<Tests />} />
-          <Route element={<OverviewLayout />}>
-            <Route path="test/:id" element={<Test />} />
-          </Route>
-          <Route path="test/:id/solve?" element={<Solve />} />
-          <Route path="/404" element={<NotFound />} />
+    <Routes>
+      <Route element={<PageLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="auth" element={<Auth />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
         </Route>
-      </Routes>
-    </BrowserRouter>
+        <Route path="tests" element={<Tests />} />
+        <Route element={<OverviewLayout />}>
+          <Route path="test/:id" element={<Test />} />
+        </Route>
+        <Route path="test/:id/solve?" element={<Solve />} />
+        <Route path="/404" element={<NotFound />} />
+      </Route>
+    </Routes>
   );
 }

@@ -4,6 +4,7 @@ import {
   testsTable,
   likesTable,
   categoriesTable,
+  resultsTable,
 } from "../backend/src/db";
 
 export type User = typeof usersTable.$inferSelect;
@@ -21,6 +22,9 @@ export type TestInsert = typeof testsTable.$inferInsert;
 export type Like = typeof likesTable.$inferSelect;
 export type LikeInsert = typeof likesTable.$inferInsert;
 
+export type Result = typeof resultsTable.$inferSelect;
+export type ResultInsert = typeof resultsTable.$inferInsert;
+
 export type Question = {
   id: number;
   text: string;
@@ -37,13 +41,19 @@ export type UserContext = Omit<User, "password">;
 
 export type Author = Omit<User, "password" | "role">;
 
-export type QuestionWithoutCorrectAnswer = Omit<Question, "correctId">;
-
 export type UserWithSession = User & { active: boolean };
 
-export type TestInfo = Omit<Test, "author_id" | "category_id" | "questions"> & {
-  category: Category;
-  author: Author;
+export type TestSolve = Omit<Test, "author_id" | "category_id"> & {
+  category: Category | null;
+  author: Author | null;
+};
+
+export type TestInfo = Omit<TestSolve, "questions">;
+
+export type SelectedAnswers = Record<number, number>;
+export type TestResult = {
+  testId: number;
+  answers: SelectedAnswers;
 };
 
 export type UserCrud = {

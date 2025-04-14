@@ -25,7 +25,7 @@ export function UserLogout({
   const handleLogOut = async () => {
     try {
       const response = await fetch(
-        `http://localhost:1337/api/users/logout/${user.id}`,
+        `http://localhost:1337/api/users/${user.id}/logout`,
         {
           method: "DELETE",
           credentials: "include",

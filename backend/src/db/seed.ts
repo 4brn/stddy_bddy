@@ -45,7 +45,7 @@ async function seedCategories() {
     "programming",
   ];
   for (let cat of categories) {
-    await db.insert(categoriesTable).values({ category: cat });
+    await db.insert(categoriesTable).values({ name: cat });
   }
   console.info("Categories seed: Success");
 }
@@ -73,7 +73,7 @@ async function seedTests() {
       author_id: i,
       title: `Test ${i}`,
       is_private: false,
-      category: 1,
+      category_id: 1,
       questions: [...questions],
       created_at: new Date(),
       updated_at: new Date(),
