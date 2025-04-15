@@ -14,11 +14,6 @@ async function seedUsers() {
     password: await hash("admin"),
     role: "admin",
   });
-  users.push({
-    username: "deleted_user",
-    password: await hash("deleted_user"),
-    role: "admin",
-  });
   for (let i = 1; i <= 5; i++) {
     const user: UserInsert = {
       username: `user${i}`,
