@@ -105,7 +105,7 @@ export default function Solve() {
           </h2>
           <ScrollArea className="w-[80svw] h-full">
             {(test?.questions.length ?? 0) ? (
-              <Accordion collapsible type="single">
+              <Accordion type="multiple">
                 {test?.questions.map((q) => (
                   <AnswersContainer
                     key={q.id}
