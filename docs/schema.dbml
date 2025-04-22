@@ -1,0 +1,42 @@
+table categories {
+  id integer [pk, not null, increment]
+  name text [not null]
+}
+
+table likes {
+  id integer [pk, not null, increment]
+  test_id integer [not null]
+  user_id integer [not null]
+}
+
+table results {
+  id integer [pk, not null, increment]
+  test_id integer [not null]
+  user_id integer [not null]
+  percentage real [not null]
+  solved_at integer [not null]
+}
+
+table sessions {
+  id text [pk, not null]
+  user_id integer [not null]
+  expires_at integer [not null]
+}
+
+table tests {
+  id integer [pk, not null, increment]
+  author_id integer [not null]
+  title text [not null]
+  private integer [not null]
+  category_id integer [not null, default: 1]
+  questions text [not null]
+  created_at integer [not null]
+  updated_at integer [not null]
+}
+
+table users {
+  id integer [pk, not null, increment]
+  username text [not null, unique]
+  password text [not null]
+  role text [not null, default: 'user']
+}
