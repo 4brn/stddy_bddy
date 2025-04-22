@@ -45,7 +45,7 @@ export async function Like(req: Request, res: Response) {
   }
 
   // Check if the test is private and user is not the owner or admin
-  if (existingTest[0].is_private) {
+  if (existingTest[0].is_private && user.role !== "admin") {
     res.status(403).send({ error: "Forbidden" });
     return;
   }
@@ -119,7 +119,7 @@ export async function Dislike(req: Request, res: Response) {
     return;
   }
 
-  if (existingTest[0].is_private) {
+  if (existingTest[0].is_private && user.role !== "admin") {
     res.status(403).send({ error: "Forbidden" });
     return;
   }
