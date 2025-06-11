@@ -109,7 +109,7 @@ stddybddy/
     *   Създайте `.env` файл
         ```env
         # .env в директория backend
-        DB_FILE_NAME=./stddybuddy.db # Или предпочитан път/име за SQLite файла
+        DB_FILE_NAME=file:stddybuddy.db # Или предпочитан път/име за SQLite файла
         PORT=1337 # Опционално, по подразбиране е 1337
         ```
 

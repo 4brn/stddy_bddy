@@ -49,7 +49,6 @@ export default function Tests() {
           credentials: "include",
         });
 
-
         if (response.ok) {
           const json = await response.json();
           setCategories(json.data);
@@ -95,7 +94,7 @@ export default function Tests() {
 
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <div className="w-[80vw] h-[40vh] sm:w-[50vw]">
+      <div className="w-[80vw] h-[30vh] sm:w-[50vw]">
         <Command
           loop
           className="bg-background flex flex-col gap-3"
